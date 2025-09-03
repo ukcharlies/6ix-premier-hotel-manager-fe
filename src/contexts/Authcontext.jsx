@@ -1,23 +1,22 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import api, { authService } from "../services/api";
+import api from "../services/api";
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // hydrate user from token
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      // optionally fetch user profile
       api
         .get("/auth/me")
-        .then((res) => {
-          setCurrentUser(res.data);
-        })
+        .then((res) => setCurrentUser(res.data))
         .catch(() => {
           localStorage.removeItem("token");
+          setCurrentUser(null);
         })
         .finally(() => setLoading(false));
     } else {
@@ -26,9 +25,12 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const res = await authService.login(email, password);
-    localStorage.setItem("token", res.data.token);
-    setCurrentUser(res.data.user);
+    const res = await api.post("/auth/login", { email, password });
+    if (res?.data?.token) {
+      localStorage.setItem("token", res.data.token);
+      setCurrentUser(res.data.user);
+    }
+    return res;
   };
 
   const logout = () => {
@@ -41,6 +43,6 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
 export const useAuth = () => useContext(AuthContext);
