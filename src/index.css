@@ -1,6 +1,6 @@
 /* src/index.css (optimal setup) */
 @import "tailwindcss";
-@import "flowbite-react/theme.css";
+@import "flowbite/dist/flowbite.css";
 
 /* Optional custom theme */
 :root {
