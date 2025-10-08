@@ -14,15 +14,10 @@ export default function Login() {
     e.preventDefault();
     try {
       const res = await api.post("/auth/login", { email, password });
-      // api.post returns token; but we call auth.login for consistency
-      if (res?.data?.token) {
-        localStorage.setItem("token", res.data.token);
-        // set current user in context to match backend response
-        if (res.data.user) auth.setCurrentUser?.(res.data.user); // fallback if context exposes setter
-        navigate("/dashboard");
-      } else {
-        // attempt to use context login
-        await auth.login(email, password);
+      if (res?.data?.success) {
+        // With HTTP-only cookies, we don't need to handle the token
+        // Just update the user in context
+        auth.setCurrentUser?.(res.data.user);
         navigate("/dashboard");
       }
     } catch (err) {
