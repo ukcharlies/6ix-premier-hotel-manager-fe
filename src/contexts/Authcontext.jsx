@@ -7,21 +7,16 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // hydrate user from token
+  // Auto authenticate for development
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      api
-        .get("/auth/me")
-        .then((res) => setCurrentUser(res.data))
-        .catch(() => {
-          localStorage.removeItem("token");
-          setCurrentUser(null);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    // Set a mock authenticated user
+    setCurrentUser({
+      id: 1,
+      email: "test@example.com",
+      name: "Test User",
+      role: "admin", // This will give access to all pages
+    });
+    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
