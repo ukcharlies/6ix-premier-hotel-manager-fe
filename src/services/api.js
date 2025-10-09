@@ -9,22 +9,26 @@ const api = axios.create({
   withCredentials: true, // Important for sending/receiving cookies
 });
 
-// Attach token
-api.interceptors.request.use((cfg) => {
-  const token = localStorage.getItem("token");
-  if (token) cfg.headers.Authorization = `Bearer ${token}`;
-  return cfg;
-});
+let isRefreshing = false;
 
 // Global response handling
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
-      localStorage.removeItem("token");
-      // redirect to login (safe in browser)
-      window.location.href = "/login";
+    const originalRequest = err.config;
+    
+    // Prevent infinite loops
+    if (err.response?.status === 401 && !isRefreshing && !originalRequest._retry) {
+      isRefreshing = true;
+      originalRequest._retry = true;
+
+      // Only redirect if it's not an /auth/me request to prevent loops
+      if (!originalRequest.url.includes('/auth/me')) {
+        window.location.href = "/login";
+      }
     }
+
+    isRefreshing = false;
     return Promise.reject(err);
   }
 );
