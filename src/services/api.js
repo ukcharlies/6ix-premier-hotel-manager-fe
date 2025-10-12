@@ -17,14 +17,11 @@ api.interceptors.response.use(
   (err) => {
     const originalRequest = err.config;
     
-    // Prevent infinite loops
-    if (err.response?.status === 401 && !isRefreshing && !originalRequest._retry) {
-      isRefreshing = true;
-      originalRequest._retry = true;
-
-      // Only redirect if it's not an /auth/me request to prevent loops
-      if (!originalRequest.url.includes('/auth/me')) {
-        window.location.href = "/login";
+    // Only handle 401s for /auth/me endpoint
+    if (err.response?.status === 401 && originalRequest.url.includes('/auth/me')) {
+      if (!isRefreshing && !originalRequest._retry) {
+        isRefreshing = true;
+        originalRequest._retry = true;
       }
     }
 
