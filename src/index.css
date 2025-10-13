@@ -1,6 +1,6 @@
-/* src/index.css (optimal setup) */
-@import "tailwindcss";
-@import "flowbite/dist/flowbite.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Optional custom theme */
 :root {
@@ -8,7 +8,9 @@
   --color-hotel-accent: #f59e0b;
   --font-sans: "Inter", sans-serif;
 }
-body {
-  background-color: #f9fafb; /* Tailwind bg-gray-50 */
-  color: #1f2937; /* Tailwind text-gray-800 */
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-800;
+  }
 }
