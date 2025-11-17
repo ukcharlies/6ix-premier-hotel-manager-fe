@@ -120,12 +120,19 @@ export default function Login() {
           {isSubmitting ? 'Logging in...' : 'Login'}
         </button>
       </form>
-      <p className="mt-4 text-center text-gray-600">
-        Don't have an account?{' '}
-        <Link to="/register" className="text-blue-600 hover:underline">
-          Register here
-        </Link>
-      </p>
+      <div className="mt-4 text-center space-y-2">
+        <p className="text-gray-600">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-blue-600 hover:underline">
+            Register here
+          </Link>
+        </p>
+        <p className="text-gray-600">
+          <Link to="/forgot-password" className="text-blue-600 hover:underline">
+            Forgot your password?
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
