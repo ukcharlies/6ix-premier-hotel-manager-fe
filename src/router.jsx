@@ -1,31 +1,45 @@
-// src/router.jsx
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./contexts/Authcontext";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Public Pages
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import VerifyEmail from "./pages/VerifyEmail";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import NotFound from "./pages/NotFound";
+
+// Protected Pages
 import Dashboard from "./pages/Dashboard";
 import Rooms from "./pages/Rooms";
 import Bookings from "./pages/Bookings";
 import Profile from "./pages/Profile";
-import Admin from "./pages/Admin";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
 import ChangePassword from "./pages/ChangePassword";
+import Admin from "./pages/Admin";
 
-const AppRouter = () => {
+function AppRouter() {
+  const { currentUser } = useAuth();
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <main className="container mx-auto px-4 py-8">
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            {/* Public Routes */}
+            <Route
+              path="/login"
+              element={currentUser ? <Navigate to="/dashboard" /> : <Login />}
+            />
+            <Route
+              path="/register"
+              element={
+                currentUser ? <Navigate to="/dashboard" /> : <Register />
+              }
+            />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
@@ -90,6 +104,6 @@ const AppRouter = () => {
       </div>
     </BrowserRouter>
   );
-};
+}
 
 export default AppRouter;

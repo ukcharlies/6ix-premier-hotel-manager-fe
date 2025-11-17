@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/Authcontext";
-import { Menu } from '@headlessui/react';
-import { FaUserCircle } from 'react-icons/fa';
+import { Menu } from "@headlessui/react";
+import { FaUserCircle } from "react-icons/fa";
 
 export default function Navbar() {
   const { currentUser, logout } = useAuth();
   const nav = useNavigate();
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -27,29 +28,38 @@ export default function Navbar() {
   ];
 
   const privateLinks = [
+    { name: "Dashboard", path: "/dashboard" },
     { name: "Bookings", path: "/bookings" },
     { name: "Profile", path: "/profile" },
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "Settings", path: "/settings" },
+    { name: "Change Password", path: "/settings/change-password" },
+    ...(currentUser?.role === "ADMIN"
+      ? [{ name: "Admin Panel", path: "/admin" }]
+      : []),
   ];
 
   return (
-    <nav className="bg-white shadow-lg">
+    <nav className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
-            <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold text-blue-600">6ix Premier</span>
+            <Link to="/" className="flex-shrink-0 flex items-center mr-8">
+              <span className="text-xl font-bold text-white">6ix Premier</span>
+              {/* <span className="text-sm text-blue-200">Hotel</span> */}
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden sm:flex sm:space-x-4 items-center">
+          <div className="hidden sm:flex sm:space-x-6 items-center">
             {publicLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                className={`whitespace-nowrap text-blue-100 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
+                  ${
+                    location.pathname === link.path
+                      ? "bg-blue-700 text-white shadow-md"
+                      : "hover:text-white hover:bg-blue-700/80 hover:scale-105"
+                  }`}
               >
                 {link.name}
               </Link>
@@ -59,13 +69,13 @@ export default function Navbar() {
               <div className="flex items-center space-x-2">
                 <Link
                   to="/login"
-                  className="text-blue-600 hover:text-blue-700 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium"
+                  className="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Register
                 </Link>
@@ -83,7 +93,9 @@ export default function Navbar() {
                           <Link
                             to={link.path}
                             className={`${
-                              active ? 'bg-blue-500 text-white' : 'text-gray-900'
+                              active
+                                ? "bg-blue-500 text-white"
+                                : "text-gray-900"
                             } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
                           >
                             {link.name}
@@ -96,7 +108,7 @@ export default function Navbar() {
                         <button
                           onClick={handleLogout}
                           className={`${
-                            active ? 'bg-blue-500 text-white' : 'text-gray-900'
+                            active ? "bg-blue-500 text-white" : "text-gray-900"
                           } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
                         >
                           Logout
@@ -117,22 +129,32 @@ export default function Navbar() {
             >
               <span className="sr-only">Open main menu</span>
               <svg
-                className={`${isMobileMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
+                className={`${isMobileMenuOpen ? "hidden" : "block"} h-6 w-6`}
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
               <svg
-                className={`${isMobileMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
+                className={`${isMobileMenuOpen ? "block" : "hidden"} h-6 w-6`}
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -140,7 +162,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile menu */}
-      <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} sm:hidden`}>
+      <div className={`${isMobileMenuOpen ? "block" : "hidden"} sm:hidden`}>
         <div className="pt-2 pb-3 space-y-1">
           {publicLinks.map((link) => (
             <Link
