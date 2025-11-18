@@ -72,7 +72,7 @@ export default function Navbar() {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`whitespace-nowrap px-2 py-2 rounded-md text-xs font-medium transition-all duration-200 inline-flex items-center justify-center flex-shrink-0
+                className={`whitespace-nowrap px-2 py-2 rounded-md text-sm font-medium transition-all duration-200 inline-flex items-center justify-center flex-shrink-0
                   ${
                     location.pathname === link.path
                       ? "bg-white text-indigo-700 shadow-lg"
@@ -91,22 +91,22 @@ export default function Navbar() {
               <div className="hidden lg:flex items-center space-x-1">
                 <Link
                   to="/login"
-                  className="text-white bg-indigo-600/50 hover:bg-indigo-700 px-2 py-1 rounded-md text-xs font-medium transition-colors"
+                  className="text-white bg-indigo-600/50 hover:bg-indigo-700 px-2 py-1 rounded-md text-sm font-medium transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-white text-indigo-700 hover:bg-rose-50 px-2 py-1 rounded-md text-xs font-semibold shadow-sm transition-colors"
+                  className="bg-white text-indigo-700 hover:bg-rose-50 px-2 py-1 rounded-md text-sm font-semibold shadow-sm transition-colors"
                 >
                   Register
                 </Link>
               </div>
             ) : (
               <Menu as="div" className="relative hidden lg:block">
-                <Menu.Button className="flex items-center text-white hover:opacity-90 text-xs px-2 py-1">
+                <Menu.Button className="flex items-center text-white hover:opacity-90 text-sm px-2 py-1">
                   <FaUserCircle className="h-5 w-5" />
-                  <span className="ml-1 hidden xl:inline text-xs">
+                  <span className="ml-1 hidden xl:inline text-sm">
                     {currentUser?.firstName}
                   </span>
                 </Menu.Button>
@@ -117,7 +117,7 @@ export default function Navbar() {
                         {({ active }) => (
                           <Link
                             to={link.path}
-                            className={`group flex rounded-md items-center w-full px-2 py-1 text-xs ${
+                            className={`group flex rounded-md items-center w-full px-2 py-1 text-sm ${
                               active
                                 ? "bg-indigo-500 text-white"
                                 : "text-gray-900"
@@ -132,7 +132,7 @@ export default function Navbar() {
                       {({ active }) => (
                         <button
                           onClick={handleLogout}
-                          className={`group flex rounded-md items-center w-full px-2 py-1 text-xs ${
+                          className={`group flex rounded-md items-center w-full px-2 py-1 text-sm ${
                             active
                               ? "bg-indigo-500 text-white"
                               : "text-gray-900"
