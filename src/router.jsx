@@ -12,6 +12,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import Home from "./pages/Home";
 
 // Protected Pages
 import Dashboard from "./pages/Dashboard";
@@ -21,6 +22,10 @@ import Profile from "./pages/Profile";
 import ChangePassword from "./pages/ChangePassword";
 import Admin from "./pages/Admin";
 
+const PageShell = ({ children }) => (
+  <div className="container mx-auto px-4 py-8">{children}</div>
+);
+
 function AppRouter() {
   const { currentUser } = useAuth();
 
@@ -29,80 +34,134 @@ function AppRouter() {
       <div className="min-h-screen bg-premier-light flex flex-col">
         <Navbar />
         <main className="flex-1">
-          <div className="container mx-auto px-4 py-8">
-            <Routes>
-              {/* Public Routes */}
-              <Route
-                path="/login"
-                element={currentUser ? <Navigate to="/dashboard" /> : <Login />}
-              />
-              <Route
-                path="/register"
-                element={
-                  currentUser ? <Navigate to="/dashboard" /> : <Register />
-                }
-              />
-              <Route path="/verify-email" element={<VerifyEmail />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Routes>
+            <Route path="/" element={<Home />} />
 
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
+            {/* Public Routes */}
+            <Route
+              path="/login"
+              element={
+                currentUser ? (
+                  <Navigate to="/dashboard" />
+                ) : (
+                  <PageShell>
+                    <Login />
+                  </PageShell>
+                )
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                currentUser ? (
+                  <Navigate to="/dashboard" />
+                ) : (
+                  <PageShell>
+                    <Register />
+                  </PageShell>
+                )
+              }
+            />
+            <Route
+              path="/verify-email"
+              element={
+                <PageShell>
+                  <VerifyEmail />
+                </PageShell>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <PageShell>
+                  <ForgotPassword />
+                </PageShell>
+              }
+            />
+            <Route
+              path="/reset-password/:token"
+              element={
+                <PageShell>
+                  <ResetPassword />
+                </PageShell>
+              }
+            />
+
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <PageShell>
                     <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
+                  </PageShell>
+                </ProtectedRoute>
+              }
+            />
 
-              <Route
-                path="/rooms"
-                element={
-                  <ProtectedRoute>
+            <Route
+              path="/rooms"
+              element={
+                <ProtectedRoute>
+                  <PageShell>
                     <Rooms />
-                  </ProtectedRoute>
-                }
-              />
+                  </PageShell>
+                </ProtectedRoute>
+              }
+            />
 
-              <Route
-                path="/bookings"
-                element={
-                  <ProtectedRoute>
+            <Route
+              path="/bookings"
+              element={
+                <ProtectedRoute>
+                  <PageShell>
                     <Bookings />
-                  </ProtectedRoute>
-                }
-              />
+                  </PageShell>
+                </ProtectedRoute>
+              }
+            />
 
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <PageShell>
                     <Profile />
-                  </ProtectedRoute>
-                }
-              />
+                  </PageShell>
+                </ProtectedRoute>
+              }
+            />
 
-              <Route
-                path="/settings/change-password"
-                element={
-                  <ProtectedRoute>
+            <Route
+              path="/settings/change-password"
+              element={
+                <ProtectedRoute>
+                  <PageShell>
                     <ChangePassword />
-                  </ProtectedRoute>
-                }
-              />
+                  </PageShell>
+                </ProtectedRoute>
+              }
+            />
 
-              <Route
-                path="/admin/*"
-                element={
-                  <ProtectedRoute requiredRole="ADMIN">
+            <Route
+              path="/admin/*"
+              element={
+                <ProtectedRoute requiredRole="ADMIN">
+                  <PageShell>
                     <Admin />
-                  </ProtectedRoute>
-                }
-              />
+                  </PageShell>
+                </ProtectedRoute>
+              }
+            />
 
-              <Route path="*" element={<h1>404 - Page Not Found</h1>} />
-            </Routes>
-          </div>
+            <Route
+              path="*"
+              element={
+                <PageShell>
+                  <NotFound />
+                </PageShell>
+              }
+            />
+          </Routes>
         </main>
         <Footer />
       </div>
