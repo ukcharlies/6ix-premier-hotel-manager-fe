@@ -36,9 +36,6 @@ export default function Navbar() {
     { name: "Rooms", path: "/rooms" },
     { name: "Recreational Facilities", path: "/facilities" },
     { name: "Functions", path: "/functions" },
-    { name: "News", path: "/news" },
-    { name: "About", path: "/about" },
-    { name: "Contact", path: "/contact" },
   ];
 
   const privateLinks = [

@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/Authcontext";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Public Pages
@@ -25,82 +26,85 @@ function AppRouter() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
-        <main className="container mx-auto px-4 py-8">
-          <Routes>
-            {/* Public Routes */}
-            <Route
-              path="/login"
-              element={currentUser ? <Navigate to="/dashboard" /> : <Login />}
-            />
-            <Route
-              path="/register"
-              element={
-                currentUser ? <Navigate to="/dashboard" /> : <Register />
-              }
-            />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <main className="flex-1">
+          <div className="container mx-auto px-4 py-8">
+            <Routes>
+              {/* Public Routes */}
+              <Route
+                path="/login"
+                element={currentUser ? <Navigate to="/dashboard" /> : <Login />}
+              />
+              <Route
+                path="/register"
+                element={
+                  currentUser ? <Navigate to="/dashboard" /> : <Register />
+                }
+              />
+              <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/rooms"
-              element={
-                <ProtectedRoute>
-                  <Rooms />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/rooms"
+                element={
+                  <ProtectedRoute>
+                    <Rooms />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/bookings"
-              element={
-                <ProtectedRoute>
-                  <Bookings />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/bookings"
+                element={
+                  <ProtectedRoute>
+                    <Bookings />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/settings/change-password"
-              element={
-                <ProtectedRoute>
-                  <ChangePassword />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/settings/change-password"
+                element={
+                  <ProtectedRoute>
+                    <ChangePassword />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/admin/*"
-              element={
-                <ProtectedRoute requiredRole="ADMIN">
-                  <Admin />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/admin/*"
+                element={
+                  <ProtectedRoute requiredRole="ADMIN">
+                    <Admin />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route path="*" element={<h1>404 - Page Not Found</h1>} />
-          </Routes>
+              <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+            </Routes>
+          </div>
         </main>
+        <Footer />
       </div>
     </BrowserRouter>
   );
