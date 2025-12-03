@@ -26,7 +26,7 @@ function AppRouter() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-premier-light flex flex-col">
         <Navbar />
         <main className="flex-1">
           <div className="container mx-auto px-4 py-8">

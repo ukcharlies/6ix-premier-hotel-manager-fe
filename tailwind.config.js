@@ -8,29 +8,41 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#fdf6ff',
-          100: '#f8ecff',
-          200: '#ecd1ff',
-          300: '#d3a8ff',
-          400: '#b67cff',
-          500: '#8f4cff',
-          600: '#6b2bd6',
-          700: '#4b1aa8',
-          800: '#33107a',
-          900: '#1d0547'
+        // Custom 6ix Premier Color Palette
+        premier: {
+          // Light backgrounds & subtle elements
+          'light': '#DAE1E1',      // Lightest gray
+          'gray': '#C4D1D5',       // Light blue-gray
+          // Primary accent - Warm copper/brown
+          'copper': '#A47550',     // Warm brown accent
+          // Dark elements
+          'dark': '#1B2E34',       // Dark blue-gray
+          'black': '#151515',      // Almost black
         },
-        accent: {
-          50: '#fff8f6',
-          100: '#fff1ef',
-          200: '#ffd7ce',
-          300: '#ffb49a',
-          400: '#ff8a63',
-          500: '#ff6b3e',
-          600: '#e85a30',
-          700: '#b74324',
-          800: '#7f2f19',
-          900: '#4f1b10'
+        // Semantic color mappings for easy use
+        primary: {
+          50: '#f0f4f5',
+          100: '#DAE1E1',
+          200: '#C4D1D5',
+          300: '#a8b9bf',
+          400: '#8ca1a9',
+          500: '#A47550',  // Copper as primary
+          600: '#8d6244',
+          700: '#6f4e36',
+          800: '#523929',
+          900: '#1B2E34',
+        },
+        dark: {
+          50: '#e8eaeb',
+          100: '#C4D1D5',
+          200: '#9aa8ae',
+          300: '#6f7f87',
+          400: '#455660',
+          500: '#1B2E34',  // Main dark
+          600: '#17262d',
+          700: '#121e23',
+          800: '#0e161a',
+          900: '#151515',  // Darkest
         }
       },
       fontFamily: {

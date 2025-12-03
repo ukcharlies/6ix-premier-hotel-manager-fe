@@ -66,12 +66,12 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-rose-500 flex items-center justify-center px-4 py-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-premier-dark via-dark-700 to-premier-copper flex items-center justify-center px-4 py-8 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-2000" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute -bottom-8 left-20 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-4000" style={{ animationDelay: '4s' }}></div>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-premier-light rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-premier-gray rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-2000" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute -bottom-8 left-20 w-96 h-96 bg-premier-light rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-4000" style={{ animationDelay: '4s' }}></div>
       </div>
 
       {/* Content container */}
@@ -80,26 +80,26 @@ export default function Login() {
           {/* Left side - Welcome message (hidden on mobile) */}
           <div className="hidden lg:flex flex-col justify-center text-white animate-fade-in">
             <div className="flex items-center space-x-3 mb-6">
-              <div className="p-3 bg-white/20 backdrop-blur-md rounded-lg">
-                <FaHotel className="text-3xl text-white" />
+              <div className="p-3 bg-premier-copper/30 backdrop-blur-md rounded-lg">
+                <FaHotel className="text-3xl text-premier-copper" />
               </div>
               <h1 className="text-3xl font-bold">6ix Premier</h1>
             </div>
             <h2 className="text-4xl font-bold mb-4 leading-tight">Welcome Back</h2>
-            <p className="text-white/80 text-lg mb-6">
+            <p className="text-premier-light text-lg mb-6">
               Experience luxury hospitality management at its finest. Manage your bookings, profile, and more with ease.
             </p>
             <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-white/90">
-                <div className="w-2 h-2 bg-rose-300 rounded-full"></div>
+              <div className="flex items-center space-x-3 text-premier-light">
+                <div className="w-2 h-2 bg-premier-copper rounded-full"></div>
                 <span>Seamless booking management</span>
               </div>
-              <div className="flex items-center space-x-3 text-white/90">
-                <div className="w-2 h-2 bg-rose-300 rounded-full"></div>
+              <div className="flex items-center space-x-3 text-premier-light">
+                <div className="w-2 h-2 bg-premier-copper rounded-full"></div>
                 <span>Premium guest experience</span>
               </div>
-              <div className="flex items-center space-x-3 text-white/90">
-                <div className="w-2 h-2 bg-rose-300 rounded-full"></div>
+              <div className="flex items-center space-x-3 text-premier-light">
+                <div className="w-2 h-2 bg-premier-copper rounded-full"></div>
                 <span>Secure & reliable</span>
               </div>
             </div>
@@ -108,8 +108,8 @@ export default function Login() {
           {/* Right side - Login form */}
           <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-6 sm:p-8 animate-slide-up">
             <div className="mb-6">
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Sign In</h3>
-              <p className="text-gray-600">Enter your credentials to access your account</p>
+              <h3 className="text-2xl sm:text-3xl font-bold text-premier-dark mb-2">Sign In</h3>
+              <p className="text-dark-400">Enter your credentials to access your account</p>
             </div>
 
             {errors.submit && (
@@ -121,8 +121,8 @@ export default function Login() {
             <form onSubmit={submit} className="space-y-5">
               {/* Email field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                <div className={`relative transition-all duration-300 ${focusedField === 'email' ? 'ring-2 ring-indigo-500 rounded-lg' : ''}`}>
+                <label className="block text-sm font-medium text-premier-dark mb-2">Email Address</label>
+                <div className={`relative transition-all duration-300 ${focusedField === 'email' ? 'ring-2 ring-premier-copper rounded-lg' : ''}`}>
                   <input
                     type="email"
                     name="email"
@@ -132,7 +132,7 @@ export default function Login() {
                     onBlur={() => setFocusedField(null)}
                     placeholder="you@example.com"
                     className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none ${
-                      errors.email ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-gray-300 focus:border-indigo-500'
+                      errors.email ? 'border-red-500 bg-red-50' : 'border-premier-gray hover:border-primary-300 focus:border-premier-copper'
                     }`}
                   />
                 </div>
@@ -143,8 +143,8 @@ export default function Login() {
 
               {/* Password field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                <div className={`relative transition-all duration-300 ${focusedField === 'password' ? 'ring-2 ring-indigo-500 rounded-lg' : ''}`}>
+                <label className="block text-sm font-medium text-premier-dark mb-2">Password</label>
+                <div className={`relative transition-all duration-300 ${focusedField === 'password' ? 'ring-2 ring-premier-copper rounded-lg' : ''}`}>
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
@@ -154,13 +154,13 @@ export default function Login() {
                     onBlur={() => setFocusedField(null)}
                     placeholder="••••••••"
                     className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none pr-12 ${
-                      errors.password ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-gray-300 focus:border-indigo-500'
+                      errors.password ? 'border-red-500 bg-red-50' : 'border-premier-gray hover:border-primary-300 focus:border-premier-copper'
                     }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-dark-400 hover:text-premier-copper transition-colors duration-200"
                   >
                     {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                   </button>
@@ -172,11 +172,11 @@ export default function Login() {
 
               {/* Remember me and forgot password */}
               <div className="flex items-center justify-between">
-                <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-indigo-600 transition-colors">
-                  <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                <label className="flex items-center space-x-2 text-sm text-premier-dark cursor-pointer hover:text-premier-copper transition-colors">
+                  <input type="checkbox" className="w-4 h-4 rounded border-premier-gray text-premier-copper focus:ring-premier-copper" />
                   <span>Remember me</span>
                 </label>
-                <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+                <Link to="/forgot-password" className="text-sm text-premier-copper hover:text-primary-600 font-medium transition-colors">
                   Forgot password?
                 </Link>
               </div>
@@ -185,7 +185,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-indigo-600 to-rose-500 text-white font-semibold py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full bg-gradient-to-r from-premier-copper to-primary-600 text-white font-semibold py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center space-x-2">
@@ -199,10 +199,10 @@ export default function Login() {
             </form>
 
             {/* Footer links */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-center text-gray-600 text-sm">
+            <div className="mt-6 pt-6 border-t border-premier-gray">
+              <p className="text-center text-dark-400 text-sm">
                 Don't have an account?{' '}
-                <Link to="/register" className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
+                <Link to="/register" className="text-premier-copper hover:text-primary-600 font-semibold transition-colors">
                   Create one
                 </Link>
               </p>

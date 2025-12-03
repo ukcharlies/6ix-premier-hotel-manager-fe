@@ -49,7 +49,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-rose-500 shadow sticky top-0 z-50">
+    <nav className="bg-gradient-to-r from-premier-dark via-dark-700 to-premier-copper shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <div className="flex justify-between h-14 items-center">
           <div className="flex items-center flex-shrink-0">
@@ -57,7 +57,7 @@ export default function Navbar() {
               <span className="text-lg sm:text-xl lg:text-2xl font-extrabold text-white tracking-tight whitespace-nowrap">
                 6ix Premier
               </span>
-              {/* <span className="hidden md:inline text-sm text-rose-50">
+              {/* <span className="hidden md:inline text-sm text-premier-light">
                 Hotel
               </span> */}
             </Link>
@@ -72,8 +72,8 @@ export default function Navbar() {
                 className={`whitespace-nowrap px-2 py-2 rounded-md text-sm font-medium transition-all duration-200 inline-flex items-center justify-center flex-shrink-0
                   ${
                     location.pathname === link.path
-                      ? "bg-white text-indigo-700 shadow-lg"
-                      : "text-rose-50 hover:text-white hover:bg-indigo-600/80 hover:scale-105"
+                      ? "bg-premier-copper text-white shadow-lg"
+                      : "text-premier-light hover:text-white hover:bg-premier-dark/80 hover:scale-105"
                   }`}
                 aria-current={
                   location.pathname === link.path ? "page" : undefined
@@ -88,13 +88,13 @@ export default function Navbar() {
               <div className="hidden lg:flex items-center space-x-1">
                 <Link
                   to="/login"
-                  className="text-white bg-indigo-600/50 hover:bg-indigo-700 px-2 py-1 rounded-md text-sm font-medium transition-colors"
+                  className="text-white bg-premier-dark/70 hover:bg-premier-dark px-2 py-1 rounded-md text-sm font-medium transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-white text-indigo-700 hover:bg-rose-50 px-2 py-1 rounded-md text-sm font-semibold shadow-sm transition-colors"
+                  className="bg-premier-copper text-white hover:bg-primary-600 px-2 py-1 rounded-md text-sm font-semibold shadow-sm transition-colors"
                 >
                   Register
                 </Link>
@@ -107,7 +107,7 @@ export default function Navbar() {
                     {currentUser?.firstName}
                   </span>
                 </Menu.Button>
-                <Menu.Items className="absolute right-0 w-48 mt-1 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                <Menu.Items className="absolute right-0 w-48 mt-1 origin-top-right bg-white divide-y divide-premier-light rounded-md shadow-lg ring-1 ring-premier-dark ring-opacity-20 focus:outline-none z-50">
                   <div className="px-1 py-1">
                     {privateLinks.map((link) => (
                       <Menu.Item key={link.path}>
@@ -116,8 +116,8 @@ export default function Navbar() {
                             to={link.path}
                             className={`group flex rounded-md items-center w-full px-2 py-1 text-sm ${
                               active
-                                ? "bg-indigo-500 text-white"
-                                : "text-gray-900"
+                                ? "bg-premier-copper text-white"
+                                : "text-premier-dark"
                             }`}
                           >
                             {link.name}
@@ -131,8 +131,8 @@ export default function Navbar() {
                           onClick={handleLogout}
                           className={`group flex rounded-md items-center w-full px-2 py-1 text-sm ${
                             active
-                              ? "bg-indigo-500 text-white"
-                              : "text-gray-900"
+                              ? "bg-premier-copper text-white"
+                              : "text-premier-dark"
                           }`}
                         >
                           Logout
@@ -153,7 +153,7 @@ export default function Navbar() {
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-menu"
               aria-label="Toggle menu"
-              className="inline-flex items-center justify-center p-1.5 rounded-md text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-300 transition-colors"
+              className="inline-flex items-center justify-center p-1.5 rounded-md text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-premier-copper transition-colors"
             >
               <svg
                 className={`${isMobileMenuOpen ? "hidden" : "block"} h-5 w-5`}
@@ -199,7 +199,7 @@ export default function Navbar() {
         role="menu"
         aria-label="Main menu"
       >
-        <div className="pt-2 pb-3 space-y-1 bg-gradient-to-b from-indigo-700 to-rose-500 px-2 sm:px-4">
+        <div className="pt-2 pb-3 space-y-1 bg-gradient-to-b from-premier-dark to-premier-copper px-2 sm:px-4">
           {publicLinks.map((link) => (
             <Link
               key={link.path}
@@ -207,8 +207,8 @@ export default function Navbar() {
               onClick={() => setIsMobileMenuOpen(false)}
               className={`block w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 location.pathname === link.path
-                  ? "bg-white text-indigo-700"
-                  : "text-rose-50 hover:bg-indigo-600/80 hover:text-white"
+                  ? "bg-premier-copper text-white"
+                  : "text-premier-light hover:bg-premier-dark/80 hover:text-white"
               }`}
             >
               {link.name}
@@ -224,8 +224,8 @@ export default function Navbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`block w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
                     location.pathname === link.path
-                      ? "bg-white text-indigo-700"
-                      : "text-rose-50 hover:bg-indigo-600/80 hover:text-white"
+                      ? "bg-premier-copper text-white"
+                      : "text-premier-light hover:bg-premier-dark/80 hover:text-white"
                   }`}
                 >
                   {link.name}
@@ -236,7 +236,7 @@ export default function Navbar() {
                   handleLogout();
                   setIsMobileMenuOpen(false);
                 }}
-                className="mt-1 w-full text-left px-3 py-2 rounded-md text-sm font-medium text-rose-50 hover:bg-indigo-600/80 hover:text-white"
+                className="mt-1 w-full text-left px-3 py-2 rounded-md text-sm font-medium text-premier-light hover:bg-premier-dark/80 hover:text-white"
               >
                 Logout
               </button>
@@ -246,14 +246,14 @@ export default function Navbar() {
               <Link
                 to="/login"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block w-full text-left px-3 py-2 rounded-md text-sm font-medium text-rose-50 hover:bg-indigo-600/80 hover:text-white"
+                className="block w-full text-left px-3 py-2 rounded-md text-sm font-medium text-premier-light hover:bg-premier-dark/80 hover:text-white"
               >
                 Login
               </Link>
               <Link
                 to="/register"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="mt-1 block w-full text-left px-3 py-2 rounded-md text-sm font-medium bg-white text-indigo-700 hover:bg-rose-50"
+                className="mt-1 block w-full text-left px-3 py-2 rounded-md text-sm font-medium bg-premier-copper text-white hover:bg-primary-600"
               >
                 Register
               </Link>
