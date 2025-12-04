@@ -65,14 +65,14 @@ function MonthCalendar({ monthDate, startDate, endDate, onSelectDay }) {
 
   return (
     <div className="w-full">
-      <div className="grid grid-cols-7 gap-2 text-center text-sm font-medium text-dark-400 mb-3">
+      <div className="grid grid-cols-7 gap-2 lg:gap-3 text-center text-sm font-medium text-dark-400 mb-4">
         {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((label) => (
           <div key={label} className="text-premier-dark/70">
             {label}
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-7 gap-2 lg:gap-3">
         {days.map((item) =>
           item.date ? (
             <button
@@ -80,7 +80,7 @@ function MonthCalendar({ monthDate, startDate, endDate, onSelectDay }) {
               type="button"
               onClick={() => onSelectDay(item.date)}
               className={[
-                "h-10 rounded-full text-sm transition-all duration-150",
+                "h-10 lg:h-12 rounded-full text-sm lg:text-base transition-all duration-150 font-medium",
                 isSameDay(item.date, startDate) || isSameDay(item.date, endDate)
                   ? "bg-premier-copper text-white shadow-md"
                   : isInRange(item.date, startDate, endDate)
@@ -167,7 +167,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative bg-premier-light">
+    <div className="relative bg-premier-light min-h-screen">
       {/* Hero section with background image - takes 2/3 of viewport */}
       <div className="relative h-[80vh] min-h-[500px] bg-premier-dark text-white">
         <div
@@ -202,7 +202,7 @@ export default function Home() {
       </div>
 
       {/* Booking container - positioned to overlap 1/3 into hero and 2/3 outside */}
-      <div className="relative -mt-24 px-6 sm:px-10 lg:px-16 pb-16">
+      <div className="relative -mt-24 px-6 sm:px-10 lg:px-16 pb-32 z-30">
         <div className="bg-white/95 text-premier-dark rounded-3xl shadow-2xl px-4 sm:px-6 py-6 max-w-6xl mx-auto backdrop-blur">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:items-end">
             <div className="space-y-2 relative" ref={datePickerRef}>
@@ -224,8 +224,8 @@ export default function Home() {
               </button>
 
               {datePickerOpen && (
-                <div className="absolute z-20 mt-3 w-full max-w-3xl lg:max-w-2xl bg-white rounded-2xl shadow-2xl border border-premier-gray p-6">
-                  <div className="flex items-center justify-between mb-6">
+                <div className="absolute z-50 mt-3 w-full lg:w-auto lg:min-w-[700px] bg-white rounded-2xl shadow-2xl border border-premier-gray p-6 lg:p-8">
+                  <div className="flex items-center justify-between mb-8">
                     <button
                       type="button"
                       className="h-10 w-10 rounded-full border border-premier-gray text-premier-dark hover:border-premier-copper transition-colors"
@@ -271,9 +271,9 @@ export default function Home() {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10">
                     <div>
-                      <p className="text-sm font-semibold text-premier-dark mb-2">
+                      <p className="text-sm font-semibold text-premier-dark mb-4">
                         {currentMonth.toLocaleDateString("en-US", {
                           month: "long",
                           year: "numeric",
@@ -287,7 +287,7 @@ export default function Home() {
                       />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-premier-dark mb-2">
+                      <p className="text-sm font-semibold text-premier-dark mb-4">
                         {nextMonth.toLocaleDateString("en-US", {
                           month: "long",
                           year: "numeric",
@@ -302,7 +302,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="mt-6 flex justify-end gap-3">
+                  <div className="mt-8 flex justify-end gap-3">
                     <button
                       type="button"
                       onClick={() => {

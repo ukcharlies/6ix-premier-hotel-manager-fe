@@ -64,46 +64,50 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex lg:items-center lg:space-x-0.5 flex-1 justify-center px-2">
-            {publicLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`whitespace-nowrap px-2 py-2 rounded-md text-sm font-medium transition-all duration-200 inline-flex items-center justify-center flex-shrink-0
-                  ${
-                    location.pathname === link.path
-                      ? "bg-premier-copper text-white shadow-lg"
-                      : "text-premier-light hover:text-white hover:bg-premier-dark/80 hover:scale-105"
-                  }`}
-                aria-current={
-                  location.pathname === link.path ? "page" : undefined
-                }
-              >
-                {link.name}
-              </Link>
-            ))}
+          <div className="hidden lg:flex lg:items-center flex-1 justify-center px-4">
+            <div className="flex items-center space-x-1">
+              {publicLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`whitespace-nowrap px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 inline-flex items-center justify-center
+                    ${
+                      location.pathname === link.path
+                        ? "bg-premier-copper text-white shadow-lg"
+                        : "text-premier-light hover:text-white hover:bg-premier-dark/80 hover:scale-105"
+                    }`}
+                  aria-current={
+                    location.pathname === link.path ? "page" : undefined
+                  }
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+          </div>
 
-            {/* Auth buttons */}
+          {/* Auth Section - Fixed to the right */}
+          <div className="hidden lg:flex items-center flex-shrink-0">
             {!currentUser ? (
-              <div className="hidden lg:flex items-center space-x-1">
+              <div className="flex items-center space-x-2">
                 <Link
                   to="/login"
-                  className="text-white bg-premier-dark/70 hover:bg-premier-dark px-2 py-1 rounded-md text-sm font-medium transition-colors"
+                  className="text-white bg-premier-dark/70 hover:bg-premier-dark px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-premier-copper text-white hover:bg-primary-600 px-2 py-1 rounded-md text-sm font-semibold shadow-sm transition-colors"
+                  className="bg-premier-copper text-white hover:bg-primary-600 px-3 py-2 rounded-md text-sm font-semibold shadow-sm transition-colors"
                 >
                   Register
                 </Link>
               </div>
             ) : (
-              <Menu as="div" className="relative hidden lg:block">
-                <Menu.Button className="flex items-center text-white hover:opacity-90 text-sm px-2 py-1">
+              <Menu as="div" className="relative">
+                <Menu.Button className="flex items-center text-white hover:opacity-90 text-sm px-3 py-2 rounded-md hover:bg-white/10 transition-colors">
                   <FaUserCircle className="h-5 w-5" />
-                  <span className="ml-1 hidden xl:inline text-sm">
+                  <span className="ml-2 text-sm">
                     {currentUser?.firstName}
                   </span>
                 </Menu.Button>
