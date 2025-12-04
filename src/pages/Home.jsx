@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-
+import CircularGallery from "../components/CircularGallery";
 const heroImage = "/bilderboken-rlwE8f8anOc-unsplash.jpg";
 
 const CalendarIcon = () => (
@@ -393,6 +393,14 @@ export default function Home() {
               </button>
             </div>
           </div>
+        </div>
+        <div style={{ height: "600px", position: "relative" }}>
+          <CircularGallery
+            bend={3}
+            textColor="#ffffff"
+            borderRadius={0.05}
+            scrollEase={0.02}
+          />
         </div>
       </div>
     </div>
