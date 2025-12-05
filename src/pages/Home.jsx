@@ -141,6 +141,7 @@ export default function Home() {
   const [guestOpen, setGuestOpen] = useState(false);
   const [guests, setGuests] = useState({ adults: 2, children: 0 });
   const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const datePickerRef = useRef(null);
   const guestRef = useRef(null);
 
@@ -202,15 +203,21 @@ export default function Home() {
   };
 
   const handlePrevRoom = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
     setCurrentRoomIndex((prev) => 
       prev === 0 ? roomHighlights.length - 1 : prev - 1
     );
+    setTimeout(() => setIsTransitioning(false), 600);
   };
 
   const handleNextRoom = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
     setCurrentRoomIndex((prev) => 
       prev === roomHighlights.length - 1 ? 0 : prev + 1
     );
+    setTimeout(() => setIsTransitioning(false), 600);
   };
 
   return (
@@ -506,10 +513,12 @@ export default function Home() {
             </button>
 
             {/* Room Card Display */}
-            <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-white via-white to-premier-light/50 border border-premier-gray/60 shadow-lg">
+            <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-white via-white to-premier-light/50 border border-premier-gray/60 shadow-lg transition-shadow duration-500 hover:shadow-2xl">
               <div 
-                className="flex transition-transform duration-700 ease-out"
-                style={{ transform: `translateX(-${currentRoomIndex * 100}%)` }}
+                className="flex transition-all duration-[600ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                style={{ 
+                  transform: `translateX(-${currentRoomIndex * 100}%)`,
+                }}
               >
                 {roomHighlights.map((room, index) => (
                   <div
@@ -518,19 +527,35 @@ export default function Home() {
                   >
                     <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-2 gap-0 min-h-[600px] sm:min-h-[550px] md:min-h-[500px] lg:min-h-[480px]">
                       {/* Image Section */}
-                      <div className="md:col-span-2 lg:col-span-1 relative overflow-hidden min-h-[300px] sm:min-h-[350px] md:min-h-full">
-                        <img
-                          src={room.image}
-                          alt={room.title}
-                          className="absolute inset-0 h-full w-full object-cover transition duration-700 hover:scale-105"
-                          loading="lazy"
-                        />
+                      <div className="md:col-span-2 lg:col-span-1 relative overflow-hidden min-h-[300px] sm:min-h-[350px] md:min-h-full group/image">
+                        <div 
+                          className={`absolute inset-0 transition-all duration-[600ms] ${
+                            index === currentRoomIndex 
+                              ? 'scale-100 opacity-100' 
+                              : 'scale-95 opacity-0'
+                          }`}
+                        >
+                          <img
+                            src={room.image}
+                            alt={room.title}
+                            className="absolute inset-0 h-full w-full object-cover transition-all duration-1000 group-hover/image:scale-110 group-hover/image:brightness-110"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-premier-dark/30 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-500" />
+                        </div>
                       </div>
                       
                       {/* Content Section */}
                       <div className="md:col-span-3 lg:col-span-1 flex flex-col justify-center space-y-4 px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
-                        <div className="flex items-center gap-3">
-                          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-premier-copper/10 flex items-center justify-center text-premier-copper font-bold text-xl sm:text-2xl">
+                        <div 
+                          className={`flex items-center gap-3 transition-all duration-500 ${
+                            index === currentRoomIndex 
+                              ? 'translate-x-0 opacity-100' 
+                              : 'translate-x-8 opacity-0'
+                          }`}
+                          style={{ transitionDelay: index === currentRoomIndex ? '100ms' : '0ms' }}
+                        >
+                          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-premier-copper/10 flex items-center justify-center text-premier-copper font-bold text-xl sm:text-2xl transform transition-all duration-500 hover:scale-110 hover:rotate-6 hover:bg-premier-copper/20">
                             {room.title.charAt(0)}
                           </div>
                           <div>
@@ -541,24 +566,50 @@ export default function Home() {
                           </div>
                         </div>
                         
-                        <p className="text-dark-400 text-sm sm:text-base lg:text-lg leading-relaxed">
+                        <p 
+                          className={`text-dark-400 text-sm sm:text-base lg:text-lg leading-relaxed transition-all duration-500 ${
+                            index === currentRoomIndex 
+                              ? 'translate-x-0 opacity-100' 
+                              : 'translate-x-8 opacity-0'
+                          }`}
+                          style={{ transitionDelay: index === currentRoomIndex ? '150ms' : '0ms' }}
+                        >
                           {room.copy}
                         </p>
                         
-                        <div className="flex flex-wrap gap-2">
-                          {room.tags.map((tag) => (
+                        <div 
+                          className={`flex flex-wrap gap-2 transition-all duration-500 ${
+                            index === currentRoomIndex 
+                              ? 'translate-x-0 opacity-100' 
+                              : 'translate-x-8 opacity-0'
+                          }`}
+                          style={{ transitionDelay: index === currentRoomIndex ? '200ms' : '0ms' }}
+                        >
+                          {room.tags.map((tag, tagIndex) => (
                             <span
                               key={tag}
-                              className="inline-flex items-center rounded-full bg-premier-light px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-premier-dark ring-1 ring-premier-gray hover:ring-premier-copper hover:bg-premier-copper/10 transition-all duration-300"
+                              className={`inline-flex items-center rounded-full bg-premier-light px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-premier-dark ring-1 ring-premier-gray hover:ring-premier-copper hover:bg-premier-copper/10 hover:scale-105 transition-all duration-300 ${
+                                index === currentRoomIndex ? 'animate-fade-in' : ''
+                              }`}
+                              style={{ 
+                                animationDelay: index === currentRoomIndex ? `${250 + tagIndex * 50}ms` : '0ms',
+                              }}
                             >
                               {tag}
                             </span>
                           ))}
                         </div>
 
-                        <button className="mt-4 inline-flex items-center gap-2 self-start px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-premier-copper hover:bg-primary-600 text-white text-sm sm:text-base font-semibold shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105">
-                          Book This Room
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <button 
+                          className={`mt-4 inline-flex items-center gap-2 self-start px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-premier-copper hover:bg-primary-600 text-white text-sm sm:text-base font-semibold shadow-lg transition-all duration-500 hover:shadow-2xl hover:scale-110 hover:gap-3 group ${
+                            index === currentRoomIndex 
+                              ? 'translate-x-0 opacity-100' 
+                              : 'translate-x-8 opacity-0'
+                          }`}
+                          style={{ transitionDelay: index === currentRoomIndex ? '250ms' : '0ms' }}
+                        >
+                          <span>Book This Room</span>
+                          <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                           </svg>
                         </button>
@@ -574,11 +625,17 @@ export default function Home() {
               {roomHighlights.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => setCurrentRoomIndex(index)}
-                  className={`transition-all duration-300 rounded-full ${
+                  onClick={() => {
+                    if (!isTransitioning && index !== currentRoomIndex) {
+                      setIsTransitioning(true);
+                      setCurrentRoomIndex(index);
+                      setTimeout(() => setIsTransitioning(false), 600);
+                    }
+                  }}
+                  className={`transition-all duration-500 rounded-full transform hover:scale-125 ${
                     index === currentRoomIndex
-                      ? 'w-8 h-3 bg-premier-copper shadow-md'
-                      : 'w-3 h-3 bg-premier-gray hover:bg-premier-copper/50'
+                      ? 'w-10 h-3 bg-premier-copper shadow-lg scale-110'
+                      : 'w-3 h-3 bg-premier-gray hover:bg-premier-copper/60 hover:w-5'
                   }`}
                   aria-label={`Go to room ${index + 1}`}
                 />
@@ -587,8 +644,8 @@ export default function Home() {
 
             {/* Room Counter */}
             <div className="text-center mt-3 sm:mt-4">
-              <span className="text-xs sm:text-sm font-medium text-dark-400">
-                Room {currentRoomIndex + 1} of {roomHighlights.length}
+              <span className="text-xs sm:text-sm font-medium text-dark-400 transition-all duration-300">
+                Room <span className="inline-block transition-all duration-500 text-premier-copper font-bold transform scale-110">{currentRoomIndex + 1}</span> of {roomHighlights.length}
               </span>
             </div>
           </div>
