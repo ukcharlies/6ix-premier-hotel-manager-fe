@@ -483,87 +483,85 @@ export default function Home() {
           </div>
 
           {/* Carousel Container */}
-          <div className="relative">
+          <div className="relative px-8 sm:px-12 lg:px-16">
             {/* Navigation Buttons */}
             <button
               onClick={handlePrevRoom}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-6 z-10 h-12 w-12 rounded-full bg-white shadow-xl border border-premier-gray hover:bg-premier-light hover:border-premier-copper transition-all duration-300 flex items-center justify-center group"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-white shadow-xl border border-premier-gray hover:bg-premier-light hover:border-premier-copper transition-all duration-200 flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Previous room"
             >
-              <svg className="w-6 h-6 text-premier-dark group-hover:text-premier-copper transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-premier-dark group-hover:text-premier-copper transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
 
             <button
               onClick={handleNextRoom}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-6 z-10 h-12 w-12 rounded-full bg-white shadow-xl border border-premier-gray hover:bg-premier-light hover:border-premier-copper transition-all duration-300 flex items-center justify-center group"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-white shadow-xl border border-premier-gray hover:bg-premier-light hover:border-premier-copper transition-all duration-200 flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Next room"
             >
-              <svg className="w-6 h-6 text-premier-dark group-hover:text-premier-copper transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-premier-dark group-hover:text-premier-copper transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
 
             {/* Room Card Display */}
-            <div className="overflow-hidden rounded-3xl">
+            <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-white via-white to-premier-light/50 border border-premier-gray/60 shadow-lg">
               <div 
-                className="flex transition-transform duration-500 ease-in-out"
+                className="flex transition-transform duration-700 ease-out"
                 style={{ transform: `translateX(-${currentRoomIndex * 100}%)` }}
               >
                 {roomHighlights.map((room, index) => (
                   <div
-                    key={room.title}
+                    key={`${room.title}-${index}`}
                     className="w-full flex-shrink-0"
                   >
-                    <div className="mx-2 group relative overflow-hidden rounded-3xl border border-premier-gray/60 bg-gradient-to-br from-white via-white to-premier-light/50 shadow-lg shadow-dark-100/40">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-                        {/* Image Section */}
-                        <div className="aspect-[16/10] lg:aspect-auto lg:min-h-[400px] w-full overflow-hidden">
-                          <img
-                            src={room.image}
-                            alt={room.title}
-                            className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
-                            loading="lazy"
-                          />
+                    <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-2 gap-0 min-h-[600px] sm:min-h-[550px] md:min-h-[500px] lg:min-h-[480px]">
+                      {/* Image Section */}
+                      <div className="md:col-span-2 lg:col-span-1 relative overflow-hidden min-h-[300px] sm:min-h-[350px] md:min-h-full">
+                        <img
+                          src={room.image}
+                          alt={room.title}
+                          className="absolute inset-0 h-full w-full object-cover transition duration-700 hover:scale-105"
+                          loading="lazy"
+                        />
+                      </div>
+                      
+                      {/* Content Section */}
+                      <div className="md:col-span-3 lg:col-span-1 flex flex-col justify-center space-y-4 px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
+                        <div className="flex items-center gap-3">
+                          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-premier-copper/10 flex items-center justify-center text-premier-copper font-bold text-xl sm:text-2xl">
+                            {room.title.charAt(0)}
+                          </div>
+                          <div>
+                            <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-premier-dark leading-tight">
+                              {room.title}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-dark-400 mt-1">Premier Collection</p>
+                          </div>
                         </div>
                         
-                        {/* Content Section */}
-                        <div className="flex flex-col justify-center space-y-4 px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
-                          <div className="flex items-center gap-3">
-                            <div className="h-12 w-12 rounded-2xl bg-premier-copper/10 flex items-center justify-center text-premier-copper font-bold text-xl">
-                              {room.title.charAt(0)}
-                            </div>
-                            <div>
-                              <h3 className="text-2xl lg:text-3xl font-bold text-premier-dark">
-                                {room.title}
-                              </h3>
-                              <p className="text-sm text-dark-400">Premier Collection</p>
-                            </div>
-                          </div>
-                          
-                          <p className="text-dark-400 text-base lg:text-lg leading-relaxed">
-                            {room.copy}
-                          </p>
-                          
-                          <div className="flex flex-wrap gap-2">
-                            {room.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="inline-flex items-center rounded-full bg-premier-light px-4 py-2 text-sm font-semibold text-premier-dark ring-1 ring-premier-gray hover:ring-premier-copper hover:bg-premier-copper/10 transition-all duration-300"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-
-                          <button className="mt-4 inline-flex items-center gap-2 self-start px-6 py-3 rounded-full bg-premier-copper hover:bg-primary-600 text-white font-semibold shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105">
-                            Book This Room
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                          </button>
+                        <p className="text-dark-400 text-sm sm:text-base lg:text-lg leading-relaxed">
+                          {room.copy}
+                        </p>
+                        
+                        <div className="flex flex-wrap gap-2">
+                          {room.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="inline-flex items-center rounded-full bg-premier-light px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-premier-dark ring-1 ring-premier-gray hover:ring-premier-copper hover:bg-premier-copper/10 transition-all duration-300"
+                            >
+                              {tag}
+                            </span>
+                          ))}
                         </div>
+
+                        <button className="mt-4 inline-flex items-center gap-2 self-start px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-premier-copper hover:bg-primary-600 text-white text-sm sm:text-base font-semibold shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105">
+                          Book This Room
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -572,14 +570,14 @@ export default function Home() {
             </div>
 
             {/* Pagination Dots */}
-            <div className="flex items-center justify-center gap-2 mt-8">
+            <div className="flex items-center justify-center gap-2 mt-6 sm:mt-8">
               {roomHighlights.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentRoomIndex(index)}
                   className={`transition-all duration-300 rounded-full ${
                     index === currentRoomIndex
-                      ? 'w-8 h-3 bg-premier-copper'
+                      ? 'w-8 h-3 bg-premier-copper shadow-md'
                       : 'w-3 h-3 bg-premier-gray hover:bg-premier-copper/50'
                   }`}
                   aria-label={`Go to room ${index + 1}`}
@@ -588,9 +586,9 @@ export default function Home() {
             </div>
 
             {/* Room Counter */}
-            <div className="text-center mt-4">
-              <span className="text-sm font-medium text-dark-400">
-                {currentRoomIndex + 1} / {roomHighlights.length}
+            <div className="text-center mt-3 sm:mt-4">
+              <span className="text-xs sm:text-sm font-medium text-dark-400">
+                Room {currentRoomIndex + 1} of {roomHighlights.length}
               </span>
             </div>
           </div>
