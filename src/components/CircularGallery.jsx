@@ -458,9 +458,10 @@ export default function CircularGallery({
   bend = 3,
   textColor = '#ffffff',
   borderRadius = 0.05,
-  font = 'bold 30px Figtree',
+  font = '600 28px Poppins',
   scrollSpeed = 2,
-  scrollEase = 0.05
+  scrollEase = 0.05,
+  className = ''
 }) {
   const containerRef = useRef(null);
   useEffect(() => {
@@ -469,5 +470,13 @@ export default function CircularGallery({
       app.destroy();
     };
   }, [items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase]);
-  return <div className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing" ref={containerRef} />;
+  return (
+    <div
+      className={[
+        'relative w-full h-full overflow-hidden cursor-grab active:cursor-grabbing select-none',
+        className
+      ].join(' ')}
+      ref={containerRef}
+    />
+  );
 }
