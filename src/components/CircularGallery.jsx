@@ -7,7 +7,7 @@ import {
   Texture,
   Transform,
 } from "ogl";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 function debounce(func, wait) {
   let timeout;
@@ -156,16 +156,18 @@ class Media {
   createShader() {
     const texture = new Texture(this.gl, {
       generateMipmaps: false,
+      minFilter: this.gl.LINEAR,
+      magFilter: this.gl.LINEAR,
       wrapS: this.gl.CLAMP_TO_EDGE,
       wrapT: this.gl.CLAMP_TO_EDGE,
     });
 
-    // Create a 1x1 white pixel placeholder canvas
+    // Create a 1x1 transparent placeholder so nothing blinks before load
     const placeholderCanvas = document.createElement("canvas");
     placeholderCanvas.width = 1;
     placeholderCanvas.height = 1;
     const ctx = placeholderCanvas.getContext("2d");
-    ctx.fillStyle = "rgba(255, 255, 255, 0.01)"; // Nearly transparent white
+    ctx.fillStyle = "rgba(255, 255, 255, 0)";
     ctx.fillRect(0, 0, 1, 1);
     texture.image = placeholderCanvas;
 
@@ -229,7 +231,7 @@ class Media {
         uSpeed: { value: 0 },
         uTime: { value: 100 * Math.random() },
         uBorderRadius: { value: this.borderRadius },
-        uImageLoaded: { value: 9 },
+        uImageLoaded: { value: 1 },
       },
       transparent: true,
     });
@@ -239,10 +241,12 @@ class Media {
     img.src = this.image;
     img.onload = () => {
       texture.image = img;
+      texture.needsUpdate = true;
       this.program.uniforms.uImageSizes.value = [
         img.naturalWidth,
         img.naturalHeight,
       ];
+      this.program.uniforms.uImageLoaded.value = 1;
     };
     img.onerror = () => {
       console.warn("Failed to load image:", this.image);
@@ -571,8 +575,26 @@ export default function CircularGallery({
   className = "",
 }) {
   const containerRef = useRef(null);
+  const appRef = useRef(null);
+
+  // Avoid re-instantiating the gallery when the items array identity changes
+  // but content is the same. Signature only updates when image/text pairs change.
+  const itemsSignature = useMemo(() => {
+    if (!items || !items.length) return "default";
+    return items
+      .map((item) => `${item.image || ""}|${item.text || ""}`)
+      .join(";");
+  }, [items]);
+
   useEffect(() => {
-    const app = new App(containerRef.current, {
+    if (!containerRef.current) return undefined;
+    // Destroy any existing instance before creating a new one
+    if (appRef.current) {
+      appRef.current.destroy();
+      appRef.current = null;
+    }
+
+    appRef.current = new App(containerRef.current, {
       items,
       bend,
       textColor,
@@ -582,9 +604,20 @@ export default function CircularGallery({
       scrollEase,
     });
     return () => {
-      app.destroy();
+      if (appRef.current) {
+        appRef.current.destroy();
+        appRef.current = null;
+      }
     };
-  }, [items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase]);
+  }, [
+    itemsSignature,
+    bend,
+    textColor,
+    borderRadius,
+    font,
+    scrollSpeed,
+    scrollEase,
+  ]);
   return (
     <div
       className={[
