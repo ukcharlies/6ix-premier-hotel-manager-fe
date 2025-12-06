@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import CircularGallery from "../components/CircularGallery";
+import RoomShowcase from "../components/RoomShowcase";
 const heroImage = "/bilderboken-rlwE8f8anOc-unsplash.jpg";
 
 const CalendarIcon = () => (
@@ -140,10 +141,6 @@ export default function Home() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [guestOpen, setGuestOpen] = useState(false);
   const [guests, setGuests] = useState({ adults: 2, children: 0 });
-  const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
-  const autoScrollTimeoutRef = useRef(null);
   const datePickerRef = useRef(null);
   const guestRef = useRef(null);
 
@@ -167,19 +164,6 @@ export default function Home() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [datePickerOpen, guestOpen]);
-
-  // Auto-scroll carousel every 4 seconds (gives text animations time to display)
-  useEffect(() => {
-    if (!autoScrollEnabled) return;
-
-    const autoScrollInterval = setInterval(() => {
-      setCurrentRoomIndex((prev) => 
-        prev === roomHighlights.length - 1 ? 0 : prev + 1
-      );
-    }, 4000);
-
-    return () => clearInterval(autoScrollInterval);
-  }, [autoScrollEnabled, roomHighlights.length]);
 
   const formattedDates =
     startDate && endDate
@@ -215,36 +199,6 @@ export default function Home() {
       if (next.adults === 0 && next.children > 0) next.children = 0;
       return next;
     });
-  };
-
-  const handlePrevRoom = () => {
-    if (isTransitioning) return;
-    setAutoScrollEnabled(false);
-    setIsTransitioning(true);
-    setCurrentRoomIndex((prev) => 
-      prev === 0 ? roomHighlights.length - 1 : prev - 1
-    );
-    setTimeout(() => {
-      setIsTransitioning(false);
-      autoScrollTimeoutRef.current = setTimeout(() => {
-        setAutoScrollEnabled(true);
-      }, 3000);
-    }, 600);
-  };
-
-  const handleNextRoom = () => {
-    if (isTransitioning) return;
-    setAutoScrollEnabled(false);
-    setIsTransitioning(true);
-    setCurrentRoomIndex((prev) => 
-      prev === roomHighlights.length - 1 ? 0 : prev + 1
-    );
-    setTimeout(() => {
-      setIsTransitioning(false);
-      autoScrollTimeoutRef.current = setTimeout(() => {
-        setAutoScrollEnabled(true);
-      }, 3000);
-    }, 600);
   };
 
   return (
@@ -494,196 +448,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-14 sm:py-16 lg:py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 space-y-10">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-dark-300 uppercase tracking-[0.08em]">
-                Rooms & Suites
-              </p>
-              <h2 className="text-3xl sm:text-4xl font-bold text-premier-dark">
-                Spaces that feel custom-built for you
-              </h2>
-              <p className="text-dark-400 max-w-3xl">
-                Choose the mood: sweeping skyline suites, calm doubles, or quietly luxurious standards. Every room is layered with Premier linens, intuitive lighting, and tech that simply works.
-              </p>
-            </div>
-            <button className="inline-flex items-center gap-2 rounded-full bg-premier-copper hover:bg-primary-600 text-white px-5 py-2.5 text-sm font-semibold shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105">
-              <span>View More</span>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Carousel Container */}
-          <div className="relative px-8 sm:px-12 lg:px-16">
-            {/* Navigation Buttons */}
-            <button
-              onClick={handlePrevRoom}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-white shadow-xl border border-premier-gray hover:bg-premier-light hover:border-premier-copper transition-all duration-200 flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Previous room"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-premier-dark group-hover:text-premier-copper transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-
-            <button
-              onClick={handleNextRoom}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-white shadow-xl border border-premier-gray hover:bg-premier-light hover:border-premier-copper transition-all duration-200 flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Next room"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-premier-dark group-hover:text-premier-copper transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            {/* Room Card Display */}
-            <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-white via-white to-premier-light/50 border border-premier-gray/60 shadow-lg transition-shadow duration-500 hover:shadow-2xl">
-              <div 
-                className="flex transition-all duration-[600ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-                style={{ 
-                  transform: `translateX(-${currentRoomIndex * 100}%)`,
-                }}
-              >
-                {roomHighlights.map((room, index) => (
-                  <div
-                    key={`${room.title}-${index}`}
-                    className="w-full flex-shrink-0"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-2 gap-0 min-h-[600px] sm:min-h-[550px] md:min-h-[500px] lg:min-h-[480px]">
-                      {/* Image Section */}
-                      <div className="md:col-span-2 lg:col-span-1 relative overflow-hidden min-h-[300px] sm:min-h-[350px] md:min-h-full group/image">
-                        <div 
-                          className={`absolute inset-0 transition-all duration-[600ms] ${
-                            index === currentRoomIndex 
-                              ? 'scale-100 opacity-100' 
-                              : 'scale-95 opacity-0'
-                          }`}
-                        >
-                          <img
-                            src={room.image}
-                            alt={room.title}
-                            className="absolute inset-0 h-full w-full object-cover transition-all duration-1000 group-hover/image:scale-110 group-hover/image:brightness-110"
-                            loading="lazy"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-premier-dark/30 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-500" />
-                        </div>
-                      </div>
-                      
-                      {/* Content Section */}
-                      <div className="md:col-span-3 lg:col-span-1 flex flex-col justify-center space-y-4 px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
-                        <div 
-                          className={`flex items-center gap-3 transition-all duration-500 ${
-                            index === currentRoomIndex 
-                              ? 'translate-x-0 opacity-100' 
-                              : 'translate-x-8 opacity-0'
-                          }`}
-                          style={{ transitionDelay: index === currentRoomIndex ? '100ms' : '0ms' }}
-                        >
-                          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-premier-copper/10 flex items-center justify-center text-premier-copper font-bold text-xl sm:text-2xl transform transition-all duration-500 hover:scale-110 hover:rotate-6 hover:bg-premier-copper/20">
-                            {room.title.charAt(0)}
-                          </div>
-                          <div>
-                            <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-premier-dark leading-tight">
-                              {room.title}
-                            </h3>
-                            <p className="text-xs sm:text-sm text-dark-400 mt-1">Premier Collection</p>
-                          </div>
-                        </div>
-                        
-                        <p 
-                          className={`text-dark-400 text-sm sm:text-base lg:text-lg leading-relaxed transition-all duration-500 ${
-                            index === currentRoomIndex 
-                              ? 'translate-x-0 opacity-100' 
-                              : 'translate-x-8 opacity-0'
-                          }`}
-                          style={{ transitionDelay: index === currentRoomIndex ? '150ms' : '0ms' }}
-                        >
-                          {room.copy}
-                        </p>
-                        
-                        <div 
-                          className={`flex flex-wrap gap-2 transition-all duration-500 ${
-                            index === currentRoomIndex 
-                              ? 'translate-x-0 opacity-100' 
-                              : 'translate-x-8 opacity-0'
-                          }`}
-                          style={{ transitionDelay: index === currentRoomIndex ? '200ms' : '0ms' }}
-                        >
-                          {room.tags.map((tag, tagIndex) => (
-                            <span
-                              key={tag}
-                              className={`inline-flex items-center rounded-full bg-premier-light px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-premier-dark ring-1 ring-premier-gray hover:ring-premier-copper hover:bg-premier-copper/10 hover:scale-105 transition-all duration-300 ${
-                                index === currentRoomIndex ? 'animate-fade-in' : ''
-                              }`}
-                              style={{ 
-                                animationDelay: index === currentRoomIndex ? `${250 + tagIndex * 50}ms` : '0ms',
-                              }}
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-
-                        <button 
-                          className={`mt-4 inline-flex items-center gap-2 self-start px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-premier-copper hover:bg-primary-600 text-white text-sm sm:text-base font-semibold shadow-lg transition-all duration-500 hover:shadow-2xl hover:scale-110 hover:gap-3 group ${
-                            index === currentRoomIndex 
-                              ? 'translate-x-0 opacity-100' 
-                              : 'translate-x-8 opacity-0'
-                          }`}
-                          style={{ transitionDelay: index === currentRoomIndex ? '250ms' : '0ms' }}
-                        >
-                          <span>Book This Room</span>
-                          <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Pagination Dots */}
-            <div className="flex items-center justify-center gap-2 mt-6 sm:mt-8">
-              {roomHighlights.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    if (!isTransitioning && index !== currentRoomIndex) {
-                      setAutoScrollEnabled(false);
-                      setIsTransitioning(true);
-                      setCurrentRoomIndex(index);
-                      setTimeout(() => {
-                        setIsTransitioning(false);
-                        autoScrollTimeoutRef.current = setTimeout(() => {
-                          setAutoScrollEnabled(true);
-                        }, 3000);
-                      }, 600);
-                    }
-                  }}
-                  className={`transition-all duration-500 rounded-full transform hover:scale-125 ${
-                    index === currentRoomIndex
-                      ? 'w-10 h-3 bg-premier-copper shadow-lg scale-110'
-                      : 'w-3 h-3 bg-premier-gray hover:bg-premier-copper/60 hover:w-5'
-                  }`}
-                  aria-label={`Go to room ${index + 1}`}
-                />
-              ))}
-            </div>
-
-            {/* Room Counter */}
-            <div className="text-center mt-3 sm:mt-4">
-              <span className="text-xs sm:text-sm font-medium text-dark-400 transition-all duration-300">
-                Room <span className="inline-block transition-all duration-500 text-premier-copper font-bold transform scale-110">{currentRoomIndex + 1}</span> of {roomHighlights.length}
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <RoomShowcase 
+        rooms={roomHighlights}
+        sectionTitle="ROOMS & SUITES"
+        sectionSubtitle="Spaces that feel custom-built for you"
+        viewMoreLink="/rooms"
+      />
 
       <section className="py-16 sm:py-20 lg:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 space-y-8">
