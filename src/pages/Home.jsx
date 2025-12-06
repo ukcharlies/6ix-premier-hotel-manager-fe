@@ -142,6 +142,8 @@ export default function Home() {
   const [guests, setGuests] = useState({ adults: 2, children: 0 });
   const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+  const autoScrollTimeoutRef = useRef(null);
   const datePickerRef = useRef(null);
   const guestRef = useRef(null);
 
@@ -165,6 +167,19 @@ export default function Home() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [datePickerOpen, guestOpen]);
+
+  // Auto-scroll carousel every 4 seconds (gives text animations time to display)
+  useEffect(() => {
+    if (!autoScrollEnabled) return;
+
+    const autoScrollInterval = setInterval(() => {
+      setCurrentRoomIndex((prev) => 
+        prev === roomHighlights.length - 1 ? 0 : prev + 1
+      );
+    }, 4000);
+
+    return () => clearInterval(autoScrollInterval);
+  }, [autoScrollEnabled, roomHighlights.length]);
 
   const formattedDates =
     startDate && endDate
@@ -204,20 +219,32 @@ export default function Home() {
 
   const handlePrevRoom = () => {
     if (isTransitioning) return;
+    setAutoScrollEnabled(false);
     setIsTransitioning(true);
     setCurrentRoomIndex((prev) => 
       prev === 0 ? roomHighlights.length - 1 : prev - 1
     );
-    setTimeout(() => setIsTransitioning(false), 600);
+    setTimeout(() => {
+      setIsTransitioning(false);
+      autoScrollTimeoutRef.current = setTimeout(() => {
+        setAutoScrollEnabled(true);
+      }, 3000);
+    }, 600);
   };
 
   const handleNextRoom = () => {
     if (isTransitioning) return;
+    setAutoScrollEnabled(false);
     setIsTransitioning(true);
     setCurrentRoomIndex((prev) => 
       prev === roomHighlights.length - 1 ? 0 : prev + 1
     );
-    setTimeout(() => setIsTransitioning(false), 600);
+    setTimeout(() => {
+      setIsTransitioning(false);
+      autoScrollTimeoutRef.current = setTimeout(() => {
+        setAutoScrollEnabled(true);
+      }, 3000);
+    }, 600);
   };
 
   return (
@@ -627,9 +654,15 @@ export default function Home() {
                   key={index}
                   onClick={() => {
                     if (!isTransitioning && index !== currentRoomIndex) {
+                      setAutoScrollEnabled(false);
                       setIsTransitioning(true);
                       setCurrentRoomIndex(index);
-                      setTimeout(() => setIsTransitioning(false), 600);
+                      setTimeout(() => {
+                        setIsTransitioning(false);
+                        autoScrollTimeoutRef.current = setTimeout(() => {
+                          setAutoScrollEnabled(true);
+                        }, 3000);
+                      }, 600);
                     }
                   }}
                   className={`transition-all duration-500 rounded-full transform hover:scale-125 ${
