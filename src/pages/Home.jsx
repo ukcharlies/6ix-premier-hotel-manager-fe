@@ -463,16 +463,17 @@ export default function Home() {
         viewMoreLink="/rooms"
       />
 
-      {/* TextPressure Section */}
-      <section className="relative py-6 sm:py-8 lg:py-10 bg-gradient-to-b from-white via-premier-light/20 to-white overflow-visible">
+      {/* TextPressure Section - Single Row */}
+      <section className="relative py-4 sm:py-5 lg:py-6 bg-gradient-to-b from-white via-premier-light/10 to-white overflow-visible">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
-            className="relative"
-            style={{ height: "200px", minHeight: "180px" }}
+            className="relative flex items-center justify-start gap-2 sm:gap-3 lg:gap-4"
+            style={{ height: "80px", minHeight: "70px" }}
           >
+            {/* Text: "Stay the night Remember it forever" on one line */}
             <TextPressure
-              text="Stay the night remember it forever"
-              flex={true}
+              text="Stay the night Remember it forever"
+              flex={false}
               alpha={false}
               stroke={false}
               width={true}
@@ -481,7 +482,7 @@ export default function Home() {
               textColor="#A47550"
               strokeColor="#1B2E34"
               minFontSize={24}
-              className="w-full h-full"
+              className="w-full h-full !text-left"
             />
           </div>
         </div>
