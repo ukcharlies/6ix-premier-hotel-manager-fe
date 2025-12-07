@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import CircularGallery from "../components/CircularGallery";
 import RoomShowcase from "../components/RoomShowcase";
+import TextPressure from "../components/TextPressure";
 const heroImage = "/bilderboken-rlwE8f8anOc-unsplash.jpg";
 
 const CalendarIcon = () => (
@@ -223,7 +224,8 @@ export default function Home() {
               Discover Your Perfect Luxury Escape
             </h1>
             <p className="text-lg sm:text-xl text-premier-light/90 max-w-2xl">
-              Signature stays, bespoke experiences, and seamless check-ins crafted for modern travelers who expect more than a room.
+              Signature stays, bespoke experiences, and seamless check-ins
+              crafted for modern travelers who expect more than a room.
             </p>
             <div className="flex flex-wrap gap-4">
               <button className="px-6 py-3 rounded-full bg-gradient-to-r from-primary-600 to-primary-500 text-white font-semibold shadow-lg shadow-black/20 transition-colors hover:from-primary-500 hover:to-primary-400">
@@ -244,7 +246,9 @@ export default function Home() {
                   className="rounded-2xl bg-white/5 px-4 py-3 sm:px-5 sm:py-4 ring-1 ring-white/10 backdrop-blur-sm"
                 >
                   <p className="text-sm text-premier-light/80">{item.label}</p>
-                  <p className="text-2xl font-semibold text-white">{item.value}</p>
+                  <p className="text-2xl font-semibold text-white">
+                    {item.value}
+                  </p>
                 </div>
               ))}
             </div>
@@ -261,199 +265,227 @@ export default function Home() {
                   Check-in / Check-out
                 </p>
                 <button
-                type="button"
-                onClick={() => {
-                  setDatePickerOpen((open) => !open);
-                  setGuestOpen(false);
-                }}
-                className="w-full flex items-center gap-3 rounded-2xl border border-premier-gray bg-white px-4 py-3 shadow-sm hover:border-premier-copper transition-colors text-left"
-              >
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-premier-light text-premier-dark">
-                  <CalendarIcon />
-                </span>
-                <span className="text-base font-medium">{formattedDates}</span>
-              </button>
+                  type="button"
+                  onClick={() => {
+                    setDatePickerOpen((open) => !open);
+                    setGuestOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 rounded-2xl border border-premier-gray bg-white px-4 py-3 shadow-sm hover:border-premier-copper transition-colors text-left"
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-premier-light text-premier-dark">
+                    <CalendarIcon />
+                  </span>
+                  <span className="text-base font-medium">
+                    {formattedDates}
+                  </span>
+                </button>
 
-              {datePickerOpen && (
-                <div className="absolute z-50 mt-3 w-full lg:w-auto lg:min-w-[700px] bg-white rounded-2xl shadow-2xl border border-premier-gray p-6 lg:p-8">
-                  <div className="flex items-center justify-between mb-8">
-                    <button
-                      type="button"
-                      className="h-10 w-10 rounded-full border border-premier-gray text-premier-dark hover:border-premier-copper transition-colors"
-                      onClick={() =>
-                        setCurrentMonth(
-                          new Date(
-                            currentMonth.getFullYear(),
-                            currentMonth.getMonth() - 1,
-                            1
+                {datePickerOpen && (
+                  <div className="absolute z-50 mt-3 w-full lg:w-auto lg:min-w-[700px] bg-white rounded-2xl shadow-2xl border border-premier-gray p-6 lg:p-8">
+                    <div className="flex items-center justify-between mb-8">
+                      <button
+                        type="button"
+                        className="h-10 w-10 rounded-full border border-premier-gray text-premier-dark hover:border-premier-copper transition-colors"
+                        onClick={() =>
+                          setCurrentMonth(
+                            new Date(
+                              currentMonth.getFullYear(),
+                              currentMonth.getMonth() - 1,
+                              1
+                            )
                           )
-                        )
-                      }
-                      aria-label="Previous month"
-                    >
-                      {"<"}
-                    </button>
-                    <div className="flex-1 text-center font-semibold text-lg text-premier-dark">
-                      {currentMonth.toLocaleDateString("en-US", {
-                        month: "long",
-                        year: "numeric",
-                      })}{" "}
-                      &nbsp;|&nbsp;{" "}
-                      {nextMonth.toLocaleDateString("en-US", {
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </div>
-                    <button
-                      type="button"
-                      className="h-10 w-10 rounded-full border border-premier-gray text-premier-dark hover:border-premier-copper transition-colors"
-                      onClick={() =>
-                        setCurrentMonth(
-                          new Date(
-                            currentMonth.getFullYear(),
-                            currentMonth.getMonth() + 1,
-                            1
-                          )
-                        )
-                      }
-                      aria-label="Next month"
-                    >
-                      {">"}
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10">
-                    <div>
-                      <p className="text-sm font-semibold text-premier-dark mb-4">
+                        }
+                        aria-label="Previous month"
+                      >
+                        {"<"}
+                      </button>
+                      <div className="flex-1 text-center font-semibold text-lg text-premier-dark">
                         {currentMonth.toLocaleDateString("en-US", {
                           month: "long",
                           year: "numeric",
-                        })}
-                      </p>
-                      <MonthCalendar
-                        monthDate={currentMonth}
-                        startDate={startDate}
-                        endDate={endDate}
-                        onSelectDay={handleSelectDay}
-                      />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-premier-dark mb-4">
+                        })}{" "}
+                        &nbsp;|&nbsp;{" "}
                         {nextMonth.toLocaleDateString("en-US", {
                           month: "long",
                           year: "numeric",
                         })}
-                      </p>
-                      <MonthCalendar
-                        monthDate={nextMonth}
-                        startDate={startDate}
-                        endDate={endDate}
-                        onSelectDay={handleSelectDay}
-                      />
+                      </div>
+                      <button
+                        type="button"
+                        className="h-10 w-10 rounded-full border border-premier-gray text-premier-dark hover:border-premier-copper transition-colors"
+                        onClick={() =>
+                          setCurrentMonth(
+                            new Date(
+                              currentMonth.getFullYear(),
+                              currentMonth.getMonth() + 1,
+                              1
+                            )
+                          )
+                        }
+                        aria-label="Next month"
+                      >
+                        {">"}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10">
+                      <div>
+                        <p className="text-sm font-semibold text-premier-dark mb-4">
+                          {currentMonth.toLocaleDateString("en-US", {
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </p>
+                        <MonthCalendar
+                          monthDate={currentMonth}
+                          startDate={startDate}
+                          endDate={endDate}
+                          onSelectDay={handleSelectDay}
+                        />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-premier-dark mb-4">
+                          {nextMonth.toLocaleDateString("en-US", {
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </p>
+                        <MonthCalendar
+                          monthDate={nextMonth}
+                          startDate={startDate}
+                          endDate={endDate}
+                          onSelectDay={handleSelectDay}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-8 flex justify-end gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStartDate(null);
+                          setEndDate(null);
+                        }}
+                        className="px-4 py-2 rounded-full border border-premier-gray text-premier-dark hover:border-premier-copper transition-colors"
+                      >
+                        Clear
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDatePickerOpen(false)}
+                        className="px-5 py-2 rounded-full bg-premier-copper text-white font-semibold shadow hover:bg-primary-600 transition-colors"
+                      >
+                        Save Dates
+                      </button>
                     </div>
                   </div>
+                )}
+              </div>
 
-                  <div className="mt-8 flex justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setStartDate(null);
-                        setEndDate(null);
-                      }}
-                      className="px-4 py-2 rounded-full border border-premier-gray text-premier-dark hover:border-premier-copper transition-colors"
-                    >
-                      Clear
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDatePickerOpen(false)}
-                      className="px-5 py-2 rounded-full bg-premier-copper text-white font-semibold shadow hover:bg-primary-600 transition-colors"
-                    >
-                      Save Dates
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+              <div className="space-y-2 relative" ref={guestRef}>
+                <p className="text-sm font-semibold text-premier-dark">
+                  Guests
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGuestOpen((open) => !open);
+                    setDatePickerOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 rounded-2xl border border-premier-gray bg-white px-4 py-3 shadow-sm hover:border-premier-copper transition-colors text-left"
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-premier-light text-premier-dark">
+                    <UsersIcon />
+                  </span>
+                  <span className="text-base font-medium">{guestLabel}</span>
+                </button>
 
-            <div className="space-y-2 relative" ref={guestRef}>
-              <p className="text-sm font-semibold text-premier-dark">Guests</p>
-              <button
-                type="button"
-                onClick={() => {
-                  setGuestOpen((open) => !open);
-                  setDatePickerOpen(false);
-                }}
-                className="w-full flex items-center gap-3 rounded-2xl border border-premier-gray bg-white px-4 py-3 shadow-sm hover:border-premier-copper transition-colors text-left"
-              >
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-premier-light text-premier-dark">
-                  <UsersIcon />
-                </span>
-                <span className="text-base font-medium">{guestLabel}</span>
-              </button>
-
-              {guestOpen && (
-                <div className="absolute z-20 mt-3 w-full bg-white rounded-2xl shadow-2xl border border-premier-gray p-5">
-                  <div className="space-y-4">
-                    {["adults", "children"].map((type) => (
-                      <div
-                        key={type}
-                        className="flex items-center justify-between"
-                      >
-                        <span className="capitalize text-premier-dark font-medium">
-                          {type}
-                        </span>
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => adjustGuests(type, -1)}
-                            className="h-10 w-10 rounded-xl border border-premier-gray text-premier-dark font-bold hover:border-premier-copper transition-colors"
-                          >
-                            -
-                          </button>
-                          <span className="w-8 text-center text-premier-dark font-semibold">
-                            {guests[type]}
+                {guestOpen && (
+                  <div className="absolute z-20 mt-3 w-full bg-white rounded-2xl shadow-2xl border border-premier-gray p-5">
+                    <div className="space-y-4">
+                      {["adults", "children"].map((type) => (
+                        <div
+                          key={type}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="capitalize text-premier-dark font-medium">
+                            {type}
                           </span>
-                          <button
-                            type="button"
-                            onClick={() => adjustGuests(type, 1)}
-                            className="h-10 w-10 rounded-xl border border-premier-gray text-premier-dark font-bold hover:border-premier-copper transition-colors"
-                          >
-                            +
-                          </button>
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => adjustGuests(type, -1)}
+                              className="h-10 w-10 rounded-xl border border-premier-gray text-premier-dark font-bold hover:border-premier-copper transition-colors"
+                            >
+                              -
+                            </button>
+                            <span className="w-8 text-center text-premier-dark font-semibold">
+                              {guests[type]}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => adjustGuests(type, 1)}
+                              className="h-10 w-10 rounded-xl border border-premier-gray text-premier-dark font-bold hover:border-premier-copper transition-colors"
+                            >
+                              +
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                    <div className="mt-6 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setGuestOpen(false)}
+                        className="px-5 py-2 rounded-full bg-premier-copper text-white font-semibold shadow hover:bg-primary-600 transition-colors"
+                      >
+                        Save Guests
+                      </button>
+                    </div>
                   </div>
-                  <div className="mt-6 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setGuestOpen(false)}
-                      className="px-5 py-2 rounded-full bg-premier-copper text-white font-semibold shadow hover:bg-primary-600 transition-colors"
-                    >
-                      Save Guests
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
-            <div className="w-full">
-              <button className="w-full bg-premier-copper hover:bg-primary-600 text-white font-semibold rounded-2xl py-4 shadow-lg transition-colors">
-                Search Luxury Stays
-              </button>
+              <div className="w-full">
+                <button className="w-full bg-premier-copper hover:bg-primary-600 text-white font-semibold rounded-2xl py-4 shadow-lg transition-colors">
+                  Search Luxury Stays
+                </button>
+              </div>
             </div>
-          </div>
           </div>
         </div>
       </section>
 
-      <RoomShowcase 
+      <RoomShowcase
         rooms={roomHighlights}
         sectionTitle="ROOMS & SUITES"
         sectionSubtitle="Spaces that feel custom-built for you"
         viewMoreLink="/rooms"
       />
+
+      {/* TextPressure Section */}
+      <section className="relative py-6 sm:py-8 lg:py-10 bg-gradient-to-b from-white via-premier-light/20 to-white overflow-visible">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div
+            className="relative"
+            style={{ height: "200px", minHeight: "180px" }}
+          >
+            <TextPressure
+              text="Stay the night remember it forever"
+              flex={true}
+              alpha={false}
+              stroke={false}
+              width={true}
+              weight={true}
+              italic={true}
+              textColor="#A47550"
+              strokeColor="#1B2E34"
+              minFontSize={24}
+              className="w-full h-full"
+            />
+          </div>
+        </div>
+      </section>
 
       <section className="py-16 sm:py-20 lg:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 space-y-8">
@@ -466,17 +498,19 @@ export default function Home() {
                 Circular Gallery Showcase
               </h2>
               <p className="text-dark-400 max-w-2xl">
-                Glide through our curated destinations in a smooth circular reel. Drag or scroll to explore — every card tilts into view with subtle depth and soft edges.
+                Glide through our curated destinations in a smooth circular
+                reel. Drag or scroll to explore — every card tilts into view
+                with subtle depth and soft edges.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:max-w-xs text-sm text-dark-400">
+            {/* <div className="grid grid-cols-2 gap-3 sm:max-w-xs text-sm text-dark-400">
               <div className="rounded-2xl bg-white border border-premier-gray px-3 py-2 shadow-sm">
                 Touch & drag to orbit
               </div>
               <div className="rounded-2xl bg-white border border-premier-gray px-3 py-2 shadow-sm">
                 Scroll snaps cards into focus
               </div>
-            </div>
+            </div> */}
           </div>
 
           <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-dark-900 via-premier-dark to-black ring-1 ring-white/5 shadow-[0_30px_80px_-50px_rgba(0,0,0,0.75)] px-2 sm:px-4 py-6 sm:py-8">
