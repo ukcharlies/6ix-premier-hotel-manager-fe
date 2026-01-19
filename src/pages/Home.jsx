@@ -86,15 +86,15 @@ function MonthCalendar({ monthDate, startDate, endDate, onSelectDay }) {
                 isSameDay(item.date, startDate) || isSameDay(item.date, endDate)
                   ? "bg-premier-copper text-white shadow-md"
                   : isInRange(item.date, startDate, endDate)
-                  ? "bg-premier-light text-premier-dark"
-                  : "text-premier-dark hover:bg-premier-light/80",
+                    ? "bg-premier-light text-premier-dark"
+                    : "text-premier-dark hover:bg-premier-light/80",
               ].join(" ")}
             >
               {item.date.getDate()}
             </button>
           ) : (
             <div key={item.key} />
-          )
+          ),
         )}
       </div>
     </div>
@@ -177,7 +177,7 @@ export default function Home() {
 
   const nextMonth = useMemo(
     () => new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1),
-    [currentMonth]
+    [currentMonth],
   );
 
   const handleSelectDay = (day) => {
@@ -291,8 +291,8 @@ export default function Home() {
                             new Date(
                               currentMonth.getFullYear(),
                               currentMonth.getMonth() - 1,
-                              1
-                            )
+                              1,
+                            ),
                           )
                         }
                         aria-label="Previous month"
@@ -318,8 +318,8 @@ export default function Home() {
                             new Date(
                               currentMonth.getFullYear(),
                               currentMonth.getMonth() + 1,
-                              1
-                            )
+                              1,
+                            ),
                           )
                         }
                         aria-label="Next month"
@@ -463,16 +463,16 @@ export default function Home() {
         viewMoreLink="/rooms"
       />
 
-      {/* TextPressure Section - Single Row */}
-      <section className="relative py-4 sm:py-5 lg:py-6 bg-gradient-to-b from-white via-premier-light/10 to-white overflow-visible">
+      {/* TextPressure Section - Two Lines, No Overflow */}
+      <section className="relative pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 bg-gradient-to-b from-white via-premier-light/10 to-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
-            className="relative flex flex-col items-start justify-center gap-2 sm:gap-3 lg:gap-4"
+            className="relative flex items-center justify-center"
             style={{ minHeight: "140px" }}
           >
-            {/* Line 1: Keep width/font the same */}
+            {/* Single TextPressure instance with two lines */}
             <TextPressure
-              text="Stay the night"
+              lineTexts={["Stay the night", "Remember it forever"]}
               flex={false}
               alpha={false}
               stroke={false}
@@ -481,23 +481,11 @@ export default function Home() {
               italic={true}
               textColor="#A47550"
               strokeColor="#1B2E34"
-              minFontSize={24}
-              className="w-full h-full !text-left whitespace-nowrap"
-            />
-
-            {/* Line 2: Move to its own line, same styling */}
-            <TextPressure
-              text="Remember it forever"
-              flex={false}
-              alpha={false}
-              stroke={false}
-              width={true}
-              weight={true}
-              italic={true}
-              textColor="#A47550"
-              strokeColor="#1B2E34"
-              minFontSize={24}
-              className="w-full h-full !text-left whitespace-nowrap"
+              minFontSize={20}
+              maxFontSize={160}
+              safePaddingX={16}
+              maxWidthStretch={140}
+              className="w-full !text-left"
             />
           </div>
         </div>
