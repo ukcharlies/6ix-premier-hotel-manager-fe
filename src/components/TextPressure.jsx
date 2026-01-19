@@ -99,7 +99,7 @@ const TextPressure = ({
 
       // Tuning constant K: adjust this to control how tightly text fits
       // Lower K = larger text, Higher K = smaller text
-      const K = 0.65; // Empirically tuned for Compressa VF
+      const K = 0.55; // Empirically tuned for Compressa VF (increased from 0.65 for larger text)
 
       let newFontSize = (safeW / charCount) * K;
 

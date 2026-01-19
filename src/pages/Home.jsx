@@ -464,11 +464,11 @@ export default function Home() {
       />
 
       {/* TextPressure Section - Two Lines, No Overflow */}
-      <section className="relative pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 bg-gradient-to-b from-white via-premier-light/10 to-white overflow-hidden">
+      <section className="relative py-1 sm:py-2 lg:py-3 bg-gradient-to-b from-white via-premier-light/10 to-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
             className="relative flex items-center justify-center"
-            style={{ minHeight: "140px" }}
+            style={{ minHeight: "100px" }}
           >
             {/* Single TextPressure instance with two lines */}
             <TextPressure
@@ -481,7 +481,7 @@ export default function Home() {
               italic={true}
               textColor="#A47550"
               strokeColor="#1B2E34"
-              minFontSize={20}
+              minFontSize={45}
               maxFontSize={160}
               safePaddingX={16}
               maxWidthStretch={140}
