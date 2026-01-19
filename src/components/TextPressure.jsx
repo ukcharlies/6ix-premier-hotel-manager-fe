@@ -150,7 +150,7 @@ const TextPressure = ({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full overflow-hidden bg-transparent"
+      className="relative w-full h-full overflow-visible bg-transparent"
     >
       <style>{`
         @font-face {

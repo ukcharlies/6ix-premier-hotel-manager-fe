@@ -467,12 +467,12 @@ export default function Home() {
       <section className="relative py-4 sm:py-5 lg:py-6 bg-gradient-to-b from-white via-premier-light/10 to-white overflow-visible">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
-            className="relative flex items-center justify-start gap-2 sm:gap-3 lg:gap-4"
-            style={{ height: "80px", minHeight: "70px" }}
+            className="relative flex flex-col items-start justify-center gap-2 sm:gap-3 lg:gap-4"
+            style={{ minHeight: "140px" }}
           >
-            {/* Text: "Stay the night Remember it forever" on one line */}
+            {/* Line 1: Keep width/font the same */}
             <TextPressure
-              text="Stay the night Remember it forever"
+              text="Stay the night"
               flex={false}
               alpha={false}
               stroke={false}
@@ -482,7 +482,22 @@ export default function Home() {
               textColor="#A47550"
               strokeColor="#1B2E34"
               minFontSize={24}
-              className="w-full h-full !text-left"
+              className="w-full h-full !text-left whitespace-nowrap"
+            />
+
+            {/* Line 2: Move to its own line, same styling */}
+            <TextPressure
+              text="Remember it forever"
+              flex={false}
+              alpha={false}
+              stroke={false}
+              width={true}
+              weight={true}
+              italic={true}
+              textColor="#A47550"
+              strokeColor="#1B2E34"
+              minFontSize={24}
+              className="w-full h-full !text-left whitespace-nowrap"
             />
           </div>
         </div>
