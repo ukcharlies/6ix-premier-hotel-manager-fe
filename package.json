@@ -19,6 +19,7 @@
     "flowbite": "^2.2.0",
     "flowbite-react": "^0.7.0",
     "formik": "^2.4.5",
+    "gsap": "^3.14.2",
     "ogl": "^1.0.11",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
