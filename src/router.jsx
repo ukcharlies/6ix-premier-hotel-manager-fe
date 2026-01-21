@@ -13,6 +13,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
+import Functions from "./pages/Functions";
 
 // Protected Pages
 import Dashboard from "./pages/Dashboard";
@@ -36,6 +37,7 @@ function AppRouter() {
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/functions" element={<Functions />} />
 
             {/* Public Routes */}
             <Route
