@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import CircularGallery from "../components/CircularGallery";
 import RoomShowcase from "../components/RoomShowcase";
 import TextPressure from "../components/TextPressure";
+import AmenitiesSection from "../components/AmenitiesSection";
 const heroImage = "/bilderboken-rlwE8f8anOc-unsplash.jpg";
 
 const CalendarIcon = () => (
@@ -490,6 +491,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Amenities Section */}
+      <AmenitiesSection />
 
       <section className="py-16 sm:py-20 lg:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 space-y-8">
