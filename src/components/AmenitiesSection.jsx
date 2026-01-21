@@ -3,7 +3,7 @@ import ScrollFloat from './ScrollFloat';
 const amenitiesData = [
   {
     title: "24/7 Front Desk",
-    description: "Always-on assistance and concierge service to make your stay seamless.",
+    description: "Our attentive staff is always available to assist you with check-in, luggage handling, local recommendations, and any special requests. Whether you arrive late at night or need assistance early in the morning, we're here to ensure your stay is effortless and memorable. From booking transportation to arranging dinner reservations, consider us your personal concierge team dedicated to making every moment of your stay exceptional.",
     image: "/marten-bjork-n_IKQDCyrG0-unsplash.jpg",
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
@@ -13,7 +13,7 @@ const amenitiesData = [
   },
   {
     title: "Complimentary Wi-Fi",
-    description: "Fast, secure internet in rooms & public areas to keep you connected.",
+    description: "Stay seamlessly connected with our high-speed, secure Wi-Fi available throughout the hotel. Whether you're catching up on work emails in your room, video calling loved ones from the lobby, or streaming your favorite shows, our robust network ensures you're always online. Enjoy unlimited bandwidth with enterprise-grade security, perfect for business travelers and leisure guests alike who need reliable connectivity.",
     image: "/christian-lambert-vmIWr0NnpCQ-unsplash.jpg",
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
@@ -23,7 +23,7 @@ const amenitiesData = [
   },
   {
     title: "Rooftop Pool & Lounge",
-    description: "Swim, relax, and take in stunning city views from our exclusive rooftop.",
+    description: "Escape to our exclusive rooftop oasis featuring a heated infinity pool with breathtaking city skyline views. Unwind on plush loungers, sip handcrafted cocktails from our poolside bar, and watch the sunset paint the cityscape in golden hues. Open year-round with temperature-controlled water, private cabanas available for reservation, and attentive poolside service ensuring your relaxation is never interrupted.",
     image: "/vojtech-bruzek-Yrxr3bsPdS0-unsplash.jpg",
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
@@ -33,7 +33,7 @@ const amenitiesData = [
   },
   {
     title: "Fitness Center",
-    description: "Open daily with modern equipment to maintain your wellness routine.",
+    description: "Maintain your wellness routine in our state-of-the-art fitness center, equipped with the latest Technogym cardio machines, free weights, and strength training equipment. Open 24/7 for your convenience, featuring floor-to-ceiling windows with inspiring city views, complimentary fresh towels, purified water stations, and personal training sessions available by appointment. Your health and fitness goals don't take a vacation, and neither should your workout regimen.",
     image: "/bilderboken-rlwE8f8anOc-unsplash.jpg",
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
@@ -43,7 +43,7 @@ const amenitiesData = [
   },
   {
     title: "Breakfast Buffet",
-    description: "Local and international dishes served fresh each morning to start your day right.",
+    description: "Start your day with our lavish breakfast buffet featuring an extensive selection of local and international cuisines. From freshly baked pastries and artisan breads to made-to-order omelets, tropical fruits, premium coffees, and traditional favorites, every morning becomes a culinary journey. Our chefs source the finest ingredients daily, accommodating dietary preferences and allergies with dedicated stations for gluten-free, vegan, and organic options.",
     image: "/deluxe_room.jpg",
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
@@ -53,7 +53,7 @@ const amenitiesData = [
   },
   {
     title: "Conference Rooms",
-    description: "Flexible spaces for meetings and events with state-of-the-art technology.",
+    description: "Host successful meetings and events in our versatile conference facilities, equipped with cutting-edge audiovisual technology, high-speed internet, and flexible seating arrangements. From intimate boardroom sessions to grand presentations for up to 200 attendees, our professional events team handles every detail—from custom catering menus to technical support—ensuring your business gatherings run flawlessly while you focus on what matters most.",
     image: "/room.jpg",
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
@@ -65,19 +65,21 @@ const amenitiesData = [
 
 const AmenitiesSection = () => {
   return (
-    <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-white via-premier-light/30 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-12 lg:mb-16">
-          <p className="text-sm font-semibold text-premier-copper uppercase tracking-[0.08em] mb-3">
-            What We Offer
-          </p>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-premier-dark mb-4">
-            Amenities & Facilities
-          </h2>
-          <p className="text-lg text-dark-400 max-w-2xl mx-auto">
-            From restful sleep to productive meetings — enjoy modern amenities designed for your comfort.
-          </p>
+    <section className="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-white via-premier-light/30 to-white overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12">
+        {/* Header - Left Aligned like ROOMS & SUITES */}
+        <div className="flex flex-col gap-3 mb-12 sm:mb-16">
+          <div className="space-y-3 flex-1">
+            <p className="text-sm font-semibold text-dark-300 uppercase tracking-[0.08em]">
+              WHAT WE OFFER
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-premier-dark leading-tight">
+              Amenities & Facilities
+            </h2>
+            <p className="text-dark-400 max-w-3xl">
+              From restful sleep to productive meetings — enjoy modern amenities designed for your comfort.
+            </p>
+          </div>
         </div>
 
         {/* Amenities Grid */}
@@ -115,7 +117,7 @@ const AmenitiesSection = () => {
                   scrollEnd="bottom bottom-=40%"
                   stagger={0.05}
                   containerClassName="mb-0"
-                  textClassName="text-premier-dark font-bold"
+                  textClassName="text-premier-dark font-bold whitespace-nowrap"
                 >
                   {amenity.title}
                 </ScrollFloat>
@@ -134,10 +136,19 @@ const AmenitiesSection = () => {
           ))}
         </div>
 
-        {/* CTA Button */}
-        <div className="text-center mt-16 lg:mt-20">
-          <button className="px-8 py-4 rounded-full bg-premier-copper hover:bg-primary-600 text-white font-semibold shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-            Explore Our Facilities
+        {/* CTA Button - Matching RoomShowcase Style */}
+        <div className="flex justify-center mt-16 lg:mt-20">
+          <button className="inline-flex items-center gap-2 rounded-full bg-premier-copper hover:bg-primary-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-semibold shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 w-full sm:w-auto max-w-sm group">
+            <span>Explore Our Facilities</span>
+            <svg 
+              className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor" 
+              strokeWidth="2"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
           </button>
         </div>
       </div>
