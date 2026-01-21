@@ -136,9 +136,9 @@ const AmenitiesSection = () => {
           ))}
         </div>
 
-        {/* CTA Button - Matching RoomShowcase Style */}
-        <div className="flex justify-center mt-16 lg:mt-20">
-          <button className="inline-flex items-center gap-2 rounded-full bg-premier-copper hover:bg-primary-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-semibold shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 w-full sm:w-auto max-w-sm group">
+        {/* CTA Button - Full Width End to End */}
+        <div className="mt-16 lg:mt-20">
+          <button className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-premier-copper hover:bg-primary-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-semibold shadow-lg transition-all duration-300 hover:shadow-xl group">
             <span>Explore Our Facilities</span>
             <svg 
               className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" 
