@@ -208,13 +208,18 @@ const experienceFeatures = [
 
 export default function RecreationalFacilities() {
   const heroRef = useRef(null);
+  const heroSectionRef = useRef(null);
 
-  // Parallax effect for hero
+  // Parallax effect for hero - only when hero is in viewport
   useEffect(() => {
     const handleScroll = () => {
-      if (heroRef.current) {
-        const scrollY = window.scrollY;
-        heroRef.current.style.transform = `translateY(${scrollY * 0.4}px)`;
+      if (heroRef.current && heroSectionRef.current) {
+        const heroRect = heroSectionRef.current.getBoundingClientRect();
+        // Only apply parallax when hero section is visible
+        if (heroRect.bottom > 0) {
+          const scrollY = window.scrollY;
+          heroRef.current.style.transform = `translateY(${scrollY * 0.4}px)`;
+        }
       }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -224,7 +229,10 @@ export default function RecreationalFacilities() {
   return (
     <div className="bg-premier-light">
       {/* ========== HERO SECTION ========== */}
-      <section className="relative h-[70vh] min-h-[500px] max-h-[700px] overflow-hidden">
+      <section
+        ref={heroSectionRef}
+        className="relative h-[70vh] min-h-[500px] max-h-[700px] overflow-hidden"
+      >
         {/* Background Image with Parallax */}
         <div
           ref={heroRef}
