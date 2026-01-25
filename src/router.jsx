@@ -14,6 +14,7 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 import Functions from "./pages/Functions";
+import RecreationalFacilities from "./pages/RecreationalFacilities";
 
 // Protected Pages
 import Dashboard from "./pages/Dashboard";
@@ -38,6 +39,7 @@ function AppRouter() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/functions" element={<Functions />} />
+            <Route path="/facilities" element={<RecreationalFacilities />} />
 
             {/* Public Routes */}
             <Route
