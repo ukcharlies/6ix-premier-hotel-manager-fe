@@ -25,10 +25,16 @@ export default function Rooms() {
 
   const fetchRooms = async () => {
     try {
+      setLoading(true);
       const res = await api.get("/rooms");
-      setRooms(res.data);
+      console.log("[ROOMS] API Response:", res.data);
+      
+      // Handle different response structures
+      const roomsData = res.data?.rooms || res.data?.data || res.data || [];
+      setRooms(Array.isArray(roomsData) ? roomsData : []);
     } catch (err) {
-      console.error(err);
+      console.error("[ROOMS] Fetch error:", err);
+      setRooms([]); // Prevent undefined errors
     } finally {
       setLoading(false);
     }
@@ -47,7 +53,13 @@ export default function Rooms() {
     setFiltered(r);
   };
 
-  if (loading) return <div>Loading rooms...</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="w-12 h-12 border-4 border-premier-copper border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div>

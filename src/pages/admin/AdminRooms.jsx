@@ -28,13 +28,15 @@ export default function AdminRooms() {
   const fetchRooms = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await api.get("/rooms");
       if (res.data.success) {
         setRooms(res.data.rooms);
       }
     } catch (err) {
       console.error("Failed to fetch rooms:", err);
-      setError("Failed to load rooms");
+      setError(err.response?.data?.message || "Failed to load rooms");
+      setRooms([]); // Set empty array to prevent undefined issues
     } finally {
       setLoading(false);
     }
