@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import api from "../services/api";
 
 const AuthContext = createContext();
@@ -40,6 +40,7 @@ export function AuthProvider({ children }) {
     const res = await api.post("/auth/login", { email, password });
     if (res?.data?.success) {
       setCurrentUser(res.data.user);
+      console.log(`[AUTH] User logged in: ${email}, Role: ${res.data.user.role}`);
     }
     return res;
   };
@@ -48,14 +49,17 @@ export function AuthProvider({ children }) {
     const res = await api.post("/auth/register", userData);
     if (res?.data?.success) {
       setCurrentUser(res.data.user);
+      console.log(`[AUTH] User registered: ${userData.email}, Role: ${res.data.user.role}`);
     }
     return res;
   };
 
   const logout = async () => {
     try {
+      const email = currentUser?.email;
       await api.post("/auth/logout");
       setCurrentUser(null);
+      console.log(`[AUTH] User logged out: ${email}`);
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -69,21 +73,44 @@ export function AuthProvider({ children }) {
     return res;
   };
 
+  // Memoized role-based values
+  const authValues = useMemo(() => {
+    const role = currentUser?.role || null;
+    const isAdmin = role === "ADMIN";
+    const isGuest = role === "GUEST";
+    const isAuthenticated = !!currentUser;
+
+    // Log role assignment for debugging
+    if (currentUser && process.env.NODE_ENV === "development") {
+      console.log(`[RBAC] User: ${currentUser.email}, Role: ${role}, isAdmin: ${isAdmin}`);
+    }
+
+    return {
+      currentUser,
+      loading,
+      role,
+      isAdmin,
+      isGuest,
+      isAuthenticated,
+      login,
+      logout,
+      register,
+      updateProfile,
+      setCurrentUser,
+    };
+  }, [currentUser, loading]);
+
   return (
-    <AuthContext.Provider 
-      value={{ 
-        currentUser, 
-        loading, 
-        login, 
-        logout,
-        register,
-        updateProfile,
-        setCurrentUser 
-      }}
-    >
+    <AuthContext.Provider value={authValues}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
