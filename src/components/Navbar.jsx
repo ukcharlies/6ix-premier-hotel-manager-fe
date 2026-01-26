@@ -46,6 +46,9 @@ export default function Navbar() {
     ...(currentUser?.role === "ADMIN"
       ? [{ name: "Admin Panel", path: "/admin" }]
       : []),
+    ...(currentUser?.role === "STAFF"
+      ? [{ name: "Staff Panel", path: "/staff" }]
+      : []),
   ];
 
   return (

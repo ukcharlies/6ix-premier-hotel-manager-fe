@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/Authcontext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { validateEmail } from "../utils/validation";
 import { FaEye, FaEyeSlash, FaHotel } from "react-icons/fa";
 
@@ -12,6 +12,11 @@ export default function Login() {
   const [focusedField, setFocusedField] = useState(null);
   const auth = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Check if redirected due to session expiry
+  const sessionExpired = location.state?.sessionExpired;
+  const sessionMessage = location.state?.message;
 
   const validateForm = () => {
     const newErrors = {};
@@ -111,6 +116,19 @@ export default function Login() {
               <h3 className="text-2xl sm:text-3xl font-bold text-premier-dark mb-2">Sign In</h3>
               <p className="text-dark-400">Enter your credentials to access your account</p>
             </div>
+
+            {/* Session Expired Alert */}
+            {sessionExpired && (
+              <div className="mb-4 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-sm flex items-start gap-3">
+                <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p className="font-medium">Session Expired</p>
+                  <p className="text-amber-700 text-xs mt-1">{sessionMessage || "Your session has expired. Please log in again."}</p>
+                </div>
+              </div>
+            )}
 
             {errors.submit && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm animate-shake">

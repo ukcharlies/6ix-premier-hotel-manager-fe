@@ -77,12 +77,15 @@ export function AuthProvider({ children }) {
   const authValues = useMemo(() => {
     const role = currentUser?.role || null;
     const isAdmin = role === "ADMIN";
+    const isStaff = role === "STAFF";
     const isGuest = role === "GUEST";
     const isAuthenticated = !!currentUser;
+    // Can access staff features (ADMIN or STAFF)
+    const canAccessStaffFeatures = isAdmin || isStaff;
 
     // Log role assignment for debugging
     if (currentUser && process.env.NODE_ENV === "development") {
-      console.log(`[RBAC] User: ${currentUser.email}, Role: ${role}, isAdmin: ${isAdmin}`);
+      console.log(`[RBAC] User: ${currentUser.email}, Role: ${role}, isAdmin: ${isAdmin}, isStaff: ${isStaff}`);
     }
 
     return {
@@ -90,8 +93,10 @@ export function AuthProvider({ children }) {
       loading,
       role,
       isAdmin,
+      isStaff,
       isGuest,
       isAuthenticated,
+      canAccessStaffFeatures,
       login,
       logout,
       register,
