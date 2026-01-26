@@ -4,6 +4,7 @@ import { useAuth } from "./contexts/Authcontext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 // Public Pages
 import Login from "./pages/Login";
@@ -22,7 +23,14 @@ import Rooms from "./pages/Rooms";
 import Bookings from "./pages/Bookings";
 import Profile from "./pages/Profile";
 import ChangePassword from "./pages/ChangePassword";
-import Admin from "./pages/Admin";
+
+// Admin Pages
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminRooms from "./pages/admin/AdminRooms";
+import AdminMenu from "./pages/admin/AdminMenu";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminUploads from "./pages/admin/AdminUploads";
 
 const PageShell = ({ children }) => (
   <div className="container mx-auto px-4 py-8">{children}</div>
@@ -33,142 +41,155 @@ function AppRouter() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-premier-light flex flex-col">
-        <Navbar />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/functions" element={<Functions />} />
-            <Route path="/facilities" element={<RecreationalFacilities />} />
+      <Routes>
+        {/* Admin Routes - separate layout without Navbar/Footer */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="rooms" element={<AdminRooms />} />
+          <Route path="menu" element={<AdminMenu />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="uploads" element={<AdminUploads />} />
+        </Route>
 
-            {/* Public Routes */}
-            <Route
-              path="/login"
-              element={
-                currentUser ? (
-                  <Navigate to="/dashboard" />
-                ) : (
-                  <PageShell>
-                    <Login />
-                  </PageShell>
-                )
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                currentUser ? (
-                  <Navigate to="/dashboard" />
-                ) : (
-                  <PageShell>
-                    <Register />
-                  </PageShell>
-                )
-              }
-            />
-            <Route
-              path="/verify-email"
-              element={
-                <PageShell>
-                  <VerifyEmail />
-                </PageShell>
-              }
-            />
-            <Route
-              path="/forgot-password"
-              element={
-                <PageShell>
-                  <ForgotPassword />
-                </PageShell>
-              }
-            />
-            <Route
-              path="/reset-password/:token"
-              element={
-                <PageShell>
-                  <ResetPassword />
-                </PageShell>
-              }
-            />
+        {/* Main Site Routes - with Navbar/Footer */}
+        <Route
+          path="*"
+          element={
+            <div className="min-h-screen bg-premier-light flex flex-col">
+              <Navbar />
+              <main className="flex-1">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/functions" element={<Functions />} />
+                  <Route path="/facilities" element={<RecreationalFacilities />} />
 
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <PageShell>
-                    <Dashboard />
-                  </PageShell>
-                </ProtectedRoute>
-              }
-            />
+                  {/* Public Routes */}
+                  <Route
+                    path="/login"
+                    element={
+                      currentUser ? (
+                        <Navigate to="/dashboard" />
+                      ) : (
+                        <PageShell>
+                          <Login />
+                        </PageShell>
+                      )
+                    }
+                  />
+                  <Route
+                    path="/register"
+                    element={
+                      currentUser ? (
+                        <Navigate to="/dashboard" />
+                      ) : (
+                        <PageShell>
+                          <Register />
+                        </PageShell>
+                      )
+                    }
+                  />
+                  <Route
+                    path="/verify-email"
+                    element={
+                      <PageShell>
+                        <VerifyEmail />
+                      </PageShell>
+                    }
+                  />
+                  <Route
+                    path="/forgot-password"
+                    element={
+                      <PageShell>
+                        <ForgotPassword />
+                      </PageShell>
+                    }
+                  />
+                  <Route
+                    path="/reset-password/:token"
+                    element={
+                      <PageShell>
+                        <ResetPassword />
+                      </PageShell>
+                    }
+                  />
 
-            <Route
-              path="/rooms"
-              element={
-                <ProtectedRoute>
-                  <PageShell>
-                    <Rooms />
-                  </PageShell>
-                </ProtectedRoute>
-              }
-            />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <PageShell>
+                          <Dashboard />
+                        </PageShell>
+                      </ProtectedRoute>
+                    }
+                  />
 
-            <Route
-              path="/bookings"
-              element={
-                <ProtectedRoute>
-                  <PageShell>
-                    <Bookings />
-                  </PageShell>
-                </ProtectedRoute>
-              }
-            />
+                  <Route
+                    path="/rooms"
+                    element={
+                      <ProtectedRoute>
+                        <PageShell>
+                          <Rooms />
+                        </PageShell>
+                      </ProtectedRoute>
+                    }
+                  />
 
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <PageShell>
-                    <Profile />
-                  </PageShell>
-                </ProtectedRoute>
-              }
-            />
+                  <Route
+                    path="/bookings"
+                    element={
+                      <ProtectedRoute>
+                        <PageShell>
+                          <Bookings />
+                        </PageShell>
+                      </ProtectedRoute>
+                    }
+                  />
 
-            <Route
-              path="/settings/change-password"
-              element={
-                <ProtectedRoute>
-                  <PageShell>
-                    <ChangePassword />
-                  </PageShell>
-                </ProtectedRoute>
-              }
-            />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <PageShell>
+                          <Profile />
+                        </PageShell>
+                      </ProtectedRoute>
+                    }
+                  />
 
-            <Route
-              path="/admin/*"
-              element={
-                <ProtectedRoute requiredRole="ADMIN">
-                  <PageShell>
-                    <Admin />
-                  </PageShell>
-                </ProtectedRoute>
-              }
-            />
+                  <Route
+                    path="/settings/change-password"
+                    element={
+                      <ProtectedRoute>
+                        <PageShell>
+                          <ChangePassword />
+                        </PageShell>
+                      </ProtectedRoute>
+                    }
+                  />
 
-            <Route
-              path="*"
-              element={
-                <PageShell>
-                  <NotFound />
-                </PageShell>
-              }
-            />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+                  <Route
+                    path="*"
+                    element={
+                      <PageShell>
+                        <NotFound />
+                      </PageShell>
+                    }
+                  />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
 }
