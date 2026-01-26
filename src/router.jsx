@@ -1,10 +1,12 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/Authcontext";
+import { SessionProvider } from "./contexts/SessionContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import StaffRoute from "./components/StaffRoute";
 
 // Public Pages
 import Login from "./pages/Login";
@@ -32,6 +34,14 @@ import AdminMenu from "./pages/admin/AdminMenu";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminUploads from "./pages/admin/AdminUploads";
 
+// Staff Pages
+import StaffLayout from "./pages/staff/StaffLayout";
+import StaffDashboard from "./pages/staff/StaffDashboard";
+import StaffRooms from "./pages/staff/StaffRooms";
+import StaffMenu from "./pages/staff/StaffMenu";
+import StaffBookings from "./pages/staff/StaffBookings";
+import StaffUploads from "./pages/staff/StaffUploads";
+
 const PageShell = ({ children }) => (
   <div className="container mx-auto px-4 py-8">{children}</div>
 );
@@ -41,27 +51,44 @@ function AppRouter() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Admin Routes - separate layout without Navbar/Footer */}
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminLayout />
-            </AdminRoute>
-          }
-        >
-          <Route index element={<AdminDashboard />} />
-          <Route path="rooms" element={<AdminRooms />} />
-          <Route path="menu" element={<AdminMenu />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="uploads" element={<AdminUploads />} />
-        </Route>
+      <SessionProvider>
+        <Routes>
+          {/* Admin Routes - separate layout without Navbar/Footer */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="rooms" element={<AdminRooms />} />
+            <Route path="menu" element={<AdminMenu />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="uploads" element={<AdminUploads />} />
+          </Route>
 
-        {/* Main Site Routes - with Navbar/Footer */}
-        <Route
-          path="*"
-          element={
+          {/* Staff Routes - separate layout without Navbar/Footer */}
+          <Route
+            path="/staff"
+            element={
+              <StaffRoute>
+                <StaffLayout />
+              </StaffRoute>
+            }
+          >
+            <Route index element={<StaffDashboard />} />
+            <Route path="rooms" element={<StaffRooms />} />
+            <Route path="menu" element={<StaffMenu />} />
+            <Route path="bookings" element={<StaffBookings />} />
+            <Route path="uploads" element={<StaffUploads />} />
+          </Route>
+
+          {/* Main Site Routes - with Navbar/Footer */}
+          <Route
+            path="*"
+            element={
             <div className="min-h-screen bg-premier-light flex flex-col">
               <Navbar />
               <main className="flex-1">
@@ -190,6 +217,7 @@ function AppRouter() {
           }
         />
       </Routes>
+      </SessionProvider>
     </BrowserRouter>
   );
 }

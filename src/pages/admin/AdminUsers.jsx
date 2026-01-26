@@ -63,6 +63,32 @@ export default function AdminUsers() {
     }
   };
 
+  const handlePromoteToStaff = async (user) => {
+    if (!confirm(`Promote ${user.firstName} ${user.lastName} to STAFF?`)) return;
+
+    try {
+      await api.patch(`/users/${user.id}/promote-staff`);
+      setSuccess(`${user.firstName} has been promoted to STAFF`);
+      fetchUsers();
+      fetchStats();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to promote user");
+    }
+  };
+
+  const handleChangeRole = async (user, newRole) => {
+    if (!confirm(`Change ${user.firstName} ${user.lastName}'s role to ${newRole}?`)) return;
+
+    try {
+      await api.patch(`/users/${user.id}/role`, { role: newRole });
+      setSuccess(`${user.firstName}'s role has been changed to ${newRole}`);
+      fetchUsers();
+      fetchStats();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to change role");
+    }
+  };
+
   const handleDemote = async (user) => {
     if (!confirm(`Demote ${user.firstName} ${user.lastName} to GUEST?`)) return;
 
@@ -120,6 +146,10 @@ export default function AdminUsers() {
             <p className="text-2xl font-bold text-purple-600">{stats.adminUsers}</p>
           </div>
           <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+            <p className="text-sm text-gray-500">Staff</p>
+            <p className="text-2xl font-bold text-green-600">{stats.staffUsers}</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
             <p className="text-sm text-gray-500">Guests</p>
             <p className="text-2xl font-bold text-blue-600">{stats.guestUsers}</p>
           </div>
@@ -164,6 +194,7 @@ export default function AdminUsers() {
         >
           <option value="">All Roles</option>
           <option value="ADMIN">Admin</option>
+          <option value="STAFF">Staff</option>
           <option value="GUEST">Guest</option>
         </select>
       </div>
@@ -224,21 +255,16 @@ export default function AdminUsers() {
                       </td>
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {user.role === "GUEST" ? (
-                            <button
-                              onClick={() => handlePromote(user)}
-                              className="text-purple-600 hover:text-purple-800 text-sm font-medium"
-                            >
-                              Promote
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleDemote(user)}
-                              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                            >
-                              Demote
-                            </button>
-                          )}
+                          {/* Role dropdown */}
+                          <select
+                            value={user.role}
+                            onChange={(e) => handleChangeRole(user, e.target.value)}
+                            className="text-sm px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-premier-copper focus:border-premier-copper"
+                          >
+                            <option value="GUEST">GUEST</option>
+                            <option value="STAFF">STAFF</option>
+                            <option value="ADMIN">ADMIN</option>
+                          </select>
                           <button
                             onClick={() => handleToggleStatus(user)}
                             className={`text-sm font-medium ${

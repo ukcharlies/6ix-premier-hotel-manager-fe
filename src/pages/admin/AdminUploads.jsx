@@ -25,13 +25,15 @@ export default function AdminUploads() {
   const fetchFiles = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await api.get(`/uploads?type=${selectedType}`);
       if (res.data.success) {
         setFiles(res.data.files);
       }
     } catch (err) {
       console.error("Failed to fetch files:", err);
-      setError("Failed to load files");
+      setError(err.response?.data?.message || "Failed to load files");
+      setFiles([]); // Set empty array to prevent undefined issues
     } finally {
       setLoading(false);
     }
@@ -45,6 +47,8 @@ export default function AdminUploads() {
       }
     } catch (err) {
       console.error("Failed to fetch stats:", err);
+      // Don't show error for stats, it's not critical
+      setStats(null);
     }
   };
 
