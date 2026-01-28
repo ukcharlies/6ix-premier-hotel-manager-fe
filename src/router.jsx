@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/Authcontext";
 import { SessionProvider } from "./contexts/SessionContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -51,51 +52,57 @@ function AppRouter() {
 
   return (
     <BrowserRouter>
-      <SessionProvider>
-        <Routes>
-          {/* Admin Routes - separate layout without Navbar/Footer */}
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <AdminLayout />
-              </AdminRoute>
-            }
-          >
-            <Route index element={<AdminDashboard />} />
-            <Route path="rooms" element={<AdminRooms />} />
-            <Route path="menu" element={<AdminMenu />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="uploads" element={<AdminUploads />} />
-          </Route>
+      <ErrorBoundary>
+        <SessionProvider>
+          <Routes>
+            {/* Admin Routes - separate layout without Navbar/Footer */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <ErrorBoundary>
+                    <AdminLayout />
+                  </ErrorBoundary>
+                </AdminRoute>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="rooms" element={<AdminRooms />} />
+              <Route path="menu" element={<AdminMenu />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="uploads" element={<AdminUploads />} />
+            </Route>
 
-          {/* Staff Routes - separate layout without Navbar/Footer */}
-          <Route
-            path="/staff"
-            element={
-              <StaffRoute>
-                <StaffLayout />
-              </StaffRoute>
-            }
-          >
-            <Route index element={<StaffDashboard />} />
-            <Route path="rooms" element={<StaffRooms />} />
-            <Route path="menu" element={<StaffMenu />} />
-            <Route path="bookings" element={<StaffBookings />} />
-            <Route path="uploads" element={<StaffUploads />} />
-          </Route>
+            {/* Staff Routes - separate layout without Navbar/Footer */}
+            <Route
+              path="/staff"
+              element={
+                <StaffRoute>
+                  <ErrorBoundary>
+                    <StaffLayout />
+                  </ErrorBoundary>
+                </StaffRoute>
+              }
+            >
+              <Route index element={<StaffDashboard />} />
+              <Route path="rooms" element={<StaffRooms />} />
+              <Route path="menu" element={<StaffMenu />} />
+              <Route path="bookings" element={<StaffBookings />} />
+              <Route path="uploads" element={<StaffUploads />} />
+            </Route>
 
-          {/* Main Site Routes - with Navbar/Footer */}
-          <Route
-            path="*"
-            element={
-            <div className="min-h-screen bg-premier-light flex flex-col">
-              <Navbar />
-              <main className="flex-1">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/functions" element={<Functions />} />
-                  <Route path="/facilities" element={<RecreationalFacilities />} />
+            {/* Main Site Routes - with Navbar/Footer */}
+            <Route
+              path="*"
+              element={
+              <div className="min-h-screen bg-premier-light flex flex-col">
+                <Navbar />
+                <main className="flex-1">
+                  <ErrorBoundary>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/functions" element={<Functions />} />
+                      <Route path="/facilities" element={<RecreationalFacilities />} />
 
                   {/* Public Routes */}
                   <Route
@@ -211,6 +218,7 @@ function AppRouter() {
                     }
                   />
                 </Routes>
+                  </ErrorBoundary>
               </main>
               <Footer />
             </div>
@@ -218,6 +226,7 @@ function AppRouter() {
         />
       </Routes>
       </SessionProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

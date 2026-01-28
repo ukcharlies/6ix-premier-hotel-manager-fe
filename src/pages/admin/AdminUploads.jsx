@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import api from "../../services/api";
+import { extractArrayData, extractStatsData, extractErrorMessage } from "../../utils/apiNormalizer";
 
 export default function AdminUploads() {
-  const [files, setFiles] = useState([]);
-  const [stats, setStats] = useState(null);
+  const [uploads, setUploads] = useState([]);
+  const [stats, setStats] = useState({ total: 0, totalSizeFormatted: "0 Bytes", byType: {} });
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,22 +19,28 @@ export default function AdminUploads() {
   ];
 
   useEffect(() => {
-    fetchFiles();
+    fetchUploads();
     fetchStats();
   }, [selectedType]);
 
-  const fetchFiles = async () => {
+  const fetchUploads = async () => {
     try {
       setLoading(true);
       setError(null);
+      console.log(`[ADMIN UPLOADS] Fetching uploads for type: ${selectedType}`);
+      
       const res = await api.get(`/uploads?type=${selectedType}`);
-      if (res.data.success) {
-        setFiles(res.data.files);
-      }
+      console.log("[ADMIN UPLOADS] Response:", res.data);
+      
+      // Backend returns { success: true, uploads: [...] }
+      const uploadsData = extractArrayData(res, "uploads");
+      console.log("[ADMIN UPLOADS] Extracted uploads:", uploadsData);
+      
+      setUploads(Array.isArray(uploadsData) ? uploadsData : []);
     } catch (err) {
-      console.error("Failed to fetch files:", err);
-      setError(err.response?.data?.message || "Failed to load files");
-      setFiles([]); // Set empty array to prevent undefined issues
+      console.error("[ADMIN UPLOADS] Failed to fetch uploads:", err);
+      setError(extractErrorMessage(err));
+      setUploads([]); // Prevent undefined issues
     } finally {
       setLoading(false);
     }
@@ -41,14 +48,23 @@ export default function AdminUploads() {
 
   const fetchStats = async () => {
     try {
+      console.log("[ADMIN UPLOADS] Fetching stats");
       const res = await api.get("/uploads/stats");
-      if (res.data.success) {
-        setStats(res.data.stats);
-      }
+      console.log("[ADMIN UPLOADS] Stats response:", res.data);
+      
+      // Extract stats with fallback
+      const statsData = extractStatsData(res);
+      console.log("[ADMIN UPLOADS] Extracted stats:", statsData);
+      
+      setStats({
+        total: statsData.total || 0,
+        totalSizeFormatted: statsData.totalSizeFormatted || "0 Bytes",
+        byType: statsData.byType || {},
+      });
     } catch (err) {
-      console.error("Failed to fetch stats:", err);
-      // Don't show error for stats, it's not critical
-      setStats(null);
+      console.error("[ADMIN UPLOADS] Failed to fetch stats:", err);
+      // Don't show error for stats, just set defaults
+      setStats({ total: 0, totalSizeFormatted: "0 Bytes", byType: {} });
     }
   };
 
@@ -76,16 +92,22 @@ export default function AdminUploads() {
     try {
       setUploading(true);
       setError(null);
+      console.log(`[ADMIN UPLOADS] Uploading file: ${file.name}, type: ${selectedType}`);
+      
       const res = await api.post("/uploads", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      
+      console.log("[ADMIN UPLOADS] Upload response:", res.data);
+      
       if (res.data.success) {
         setSuccess("File uploaded successfully");
-        fetchFiles();
+        fetchUploads();
         fetchStats();
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to upload file");
+      console.error("[ADMIN UPLOADS] Upload failed:", err);
+      setError(extractErrorMessage(err));
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -94,16 +116,24 @@ export default function AdminUploads() {
     }
   };
 
-  const handleDelete = async (file) => {
-    if (!confirm(`Delete "${file.name}"?`)) return;
+  const handleDelete = async (upload) => {
+    if (!confirm(`Delete "${upload.originalName || upload.filename}"?`)) return;
 
     try {
-      await api.delete("/uploads", { data: { filePath: file.path } });
+      console.log("[ADMIN UPLOADS] Deleting upload:", upload);
+      
+      await api.delete("/uploads", { 
+        data: { 
+          filePath: upload.path || `/uploads/${selectedType}/${upload.filename}` 
+        } 
+      });
+      
       setSuccess("File deleted successfully");
-      fetchFiles();
+      fetchUploads();
       fetchStats();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to delete file");
+      console.error("[ADMIN UPLOADS] Delete failed:", err);
+      setError(extractErrorMessage(err));
     }
   };
 
@@ -172,20 +202,20 @@ export default function AdminUploads() {
       </div>
 
       {/* Stats */}
-      {stats && (
+      {stats && stats.total > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
             <p className="text-sm text-gray-500">Total Files</p>
-            <p className="text-2xl font-bold text-premier-dark">{stats.total}</p>
+            <p className="text-2xl font-bold text-premier-dark">{stats.total || 0}</p>
           </div>
           <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
             <p className="text-sm text-gray-500">Total Size</p>
-            <p className="text-2xl font-bold text-premier-dark">{stats.totalSizeFormatted}</p>
+            <p className="text-2xl font-bold text-premier-dark">{stats.totalSizeFormatted || "0 Bytes"}</p>
           </div>
-          {Object.entries(stats.byType || {}).map(([type, count]) => (
+          {stats.byType && Object.entries(stats.byType).map(([type, count]) => (
             <div key={type} className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
               <p className="text-sm text-gray-500 capitalize">{type} Files</p>
-              <p className="text-2xl font-bold text-premier-dark">{count}</p>
+              <p className="text-2xl font-bold text-premier-dark">{count || 0}</p>
             </div>
           ))}
         </div>
@@ -228,37 +258,38 @@ export default function AdminUploads() {
           <div className="flex items-center justify-center h-64">
             <div className="w-12 h-12 border-4 border-premier-copper border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : files.length > 0 ? (
+        ) : uploads.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {files.map((file, index) => (
+            {uploads.map((upload) => (
               <div
-                key={index}
+                key={upload.id}
                 className="group relative bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
               >
                 <div className="aspect-square flex items-center justify-center mb-2 overflow-hidden rounded-lg bg-white">
-                  {file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                  {upload.mimetype?.startsWith("image/") ? (
                     <img
-                      src={`${import.meta.env.VITE_API_URL?.replace('/api', '')}/uploads/${selectedType}/${file.name}`}
-                      alt={file.name}
+                      src={upload.url || `${import.meta.env.VITE_API_URL?.replace('/api', '')}${upload.path}`}
+                      alt={upload.originalName || upload.filename}
                       className="w-full h-full object-cover"
                       onError={(e) => {
+                        console.error("[ADMIN UPLOADS] Image load error:", upload);
                         e.target.style.display = "none";
                         e.target.nextSibling.style.display = "flex";
                       }}
                     />
                   ) : null}
                   <div className="hidden items-center justify-center w-full h-full">
-                    {getFileIcon(file.name)}
+                    {getFileIcon(upload.filename)}
                   </div>
                 </div>
-                <p className="text-xs text-gray-600 truncate" title={file.name}>
-                  {file.name}
+                <p className="text-xs text-gray-600 truncate" title={upload.originalName || upload.filename}>
+                  {upload.originalName || upload.filename}
                 </p>
-                <p className="text-xs text-gray-400">{formatFileSize(file.size)}</p>
+                <p className="text-xs text-gray-400">{formatFileSize(upload.size)}</p>
 
                 {/* Delete button on hover */}
                 <button
-                  onClick={() => handleDelete(file)}
+                  onClick={() => handleDelete(upload)}
                   className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-600"
                   title="Delete file"
                 >
