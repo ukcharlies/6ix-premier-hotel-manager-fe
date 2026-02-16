@@ -231,38 +231,56 @@ export default function StaffMenu() {
       )}
 
       {/* Menu Items by Category */}
+      {Object.entries(groupedItems).length === 0 && (
+        <div className="text-center py-12 text-gray-500">
+          No menu items found. Click "Add Item" to create your first menu item.
+        </div>
+      )}
+      
       {Object.entries(groupedItems).map(([category, items]) => (
         <div key={category} className="mb-8">
           <h2 className="text-lg font-semibold text-premier-dark mb-4 pb-2 border-b">
-            {category}
+            {category} <span className="text-gray-400 text-sm font-normal">({items.length})</span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map((item) => (
-              <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex">
-                <div className="w-24 h-24 bg-gray-200 flex-shrink-0">
+              <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                <div className="h-40 bg-gray-200 relative overflow-hidden">
                   {item.image ? (
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    <img 
+                      src={item.image.startsWith('http') ? item.image : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${item.image}`}
+                      alt={item.name} 
+                      className="w-full h-full object-cover" 
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<div class="w-full h-full flex flex-col items-center justify-center text-gray-400"><svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span class="text-xs mt-2">No Image</span></div>';
+                      }}
+                    />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                      No Image
+                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                      <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-xs mt-2">No Image</span>
                     </div>
                   )}
+                  <span className={`absolute top-3 right-3 px-2 py-1 text-xs font-medium rounded ${
+                    item.available ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                  }`}>
+                    {item.available ? "Available" : "Unavailable"}
+                  </span>
                 </div>
-                <div className="p-3 flex-1 flex flex-col">
-                  <div className="flex items-start justify-between">
-                    <h3 className="font-medium text-premier-dark">{item.name}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded ${
-                      item.available ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                    }`}>
-                      {item.available ? "Available" : "N/A"}
-                    </span>
+                <div className="p-4">
+                  <div className="mb-2">
+                    <h3 className="font-semibold text-premier-dark">{item.name}</h3>
+                    <p className="text-sm text-gray-500 line-clamp-2 mt-1">{item.description}</p>
                   </div>
-                  <p className="text-xs text-gray-500 line-clamp-2 mt-1 flex-1">{item.description}</p>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="font-bold text-emerald-600">${item.price}</span>
+                  <div className="flex items-center justify-between mt-3">
+                    <span className="text-lg font-bold text-emerald-600">${Number(item.price).toFixed(2)}</span>
                     <button
                       onClick={() => handleEdit(item)}
-                      className="text-xs px-2 py-1 border border-emerald-600 text-emerald-600 rounded hover:bg-emerald-50"
+                      className="px-3 py-1 text-sm border border-emerald-600 text-emerald-600 rounded hover:bg-emerald-50"
                     >
                       Edit
                     </button>
@@ -273,12 +291,6 @@ export default function StaffMenu() {
           </div>
         </div>
       ))}
-
-      {menuItems.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          No menu items found. Click "Add Item" to create your first menu item.
-        </div>
-      )}
     </div>
   );
 }
