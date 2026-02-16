@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
+import RoomImageManager from "../../components/RoomImageManager";
 
 export default function AdminRooms() {
   const [rooms, setRooms] = useState([]);
@@ -8,6 +9,8 @@ export default function AdminRooms() {
   const [editingRoom, setEditingRoom] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [showImageManager, setShowImageManager] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
   const [form, setForm] = useState({
     roomNumber: "",
@@ -195,6 +198,15 @@ export default function AdminRooms() {
                         Edit
                       </button>
                       <button
+                        onClick={() => {
+                          setSelectedRoom(room);
+                          setShowImageManager(true);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 mr-3"
+                      >
+                        Images
+                      </button>
+                      <button
                         onClick={() => handleDelete(room)}
                         className="text-red-600 hover:text-red-800"
                       >
@@ -315,6 +327,19 @@ export default function AdminRooms() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Image Manager Modal */}
+      {showImageManager && selectedRoom && (
+        <RoomImageManager
+          roomId={selectedRoom.id}
+          roomNumber={selectedRoom.roomNumber}
+          onClose={() => {
+            setShowImageManager(false);
+            setSelectedRoom(null);
+            fetchRooms(); // Refresh to show updated images
+          }}
+        />
       )}
     </div>
   );

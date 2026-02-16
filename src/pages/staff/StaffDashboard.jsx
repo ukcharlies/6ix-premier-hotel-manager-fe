@@ -62,6 +62,8 @@ export default function StaffDashboard() {
     bookings: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [rooms, setRooms] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -94,6 +96,8 @@ export default function StaffDashboard() {
         const menuData = menuRes.data?.menuItems || menuRes.data?.data || [];
         const uploadsData = uploadsRes.data?.stats || uploadsRes.data?.data || {};
 
+        setRooms(Array.isArray(roomsData) ? roomsData.slice(0, 6) : []);
+        setMenuItems(Array.isArray(menuData) ? menuData.slice(0, 6) : []);
         setStats({
           rooms: Array.isArray(roomsData) ? roomsData.length : 0,
           menuItems: Array.isArray(menuData) ? menuData.length : 0,
@@ -109,6 +113,8 @@ export default function StaffDashboard() {
           uploads: 0,
           bookings: 0,
         });
+        setRooms([]);
+        setMenuItems([]);
       } finally {
         setLoading(false);
       }
@@ -244,6 +250,73 @@ export default function StaffDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Recent Rooms Section */}
+      {rooms.length > 0 && (
+        <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-premier-dark">Recent Rooms</h2>
+            <Link to="/staff/rooms" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+              View All →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {rooms.map((room) => (
+              <div key={room.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="font-semibold text-premier-dark">{room.name}</h3>
+                    <p className="text-sm text-gray-500">{room.type}</p>
+                  </div>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    room.available ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                  }`}>
+                    {room.available ? "Available" : "Unavailable"}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 line-clamp-2 mb-3">{room.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-bold text-emerald-600">${Number(room.price).toFixed(2)}</span>
+                  <span className="text-sm text-gray-500">{room.capacity} guests</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recent Menu Items Section */}
+      {menuItems.length > 0 && (
+        <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-premier-dark">Recent Menu Items</h2>
+            <Link to="/staff/menu" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+              View All →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {menuItems.map((item) => (
+              <div key={item.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="font-semibold text-premier-dark">{item.name}</h3>
+                    <p className="text-xs text-amber-600 font-medium">{item.category}</p>
+                  </div>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    item.available ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                  }`}>
+                    {item.available ? "Available" : "Unavailable"}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 line-clamp-2 mb-3">{item.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-bold text-amber-600">${Number(item.price).toFixed(2)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

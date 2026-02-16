@@ -12,12 +12,11 @@ export default function StaffMenu() {
     name: "",
     description: "",
     price: "",
-    category: "MAIN",
-    image: "",
-    available: true,
+    category: "Appetizers",
+    isAvailable: true,
   });
 
-  const categories = ["APPETIZER", "MAIN", "DESSERT", "BEVERAGE", "BREAKFAST", "LUNCH", "DINNER"];
+  const categories = ["Appetizers", "Main Course", "Desserts", "Beverages", "Specials", "Breakfast", "Lunch", "Dinner"];
 
   useEffect(() => {
     fetchMenuItems();
@@ -32,11 +31,25 @@ export default function StaffMenu() {
       const response = await api.get("/menu");
       console.log("[STAFF MENU] API Response:", response.data);
       
-      // Use apiNormalizer for consistent extraction + fallback
-      const items = extractArrayData(response, "data");
-      console.log("[STAFF MENU] Extracted items:", items);
-      
-      setMenuItems(Array.isArray(items) ? items : []);
+      if (response.data.success) {
+        const items = response.data.menuItems || response.data.data || [];
+        console.log("[STAFF MENU] Raw items:", items);
+        
+        // Transform menu items to include image URLs from menuImages junction table
+        const transformedItems = items.map(item => {
+          const imageUrls = item.menuImages?.map(mi => mi.upload.path) || [];
+          return {
+            ...item,
+            image: imageUrls[0] || null, // Use first image as main image
+            images: imageUrls, // Keep all images
+          };
+        });
+        
+        console.log("[STAFF MENU] Transformed items:", transformedItems.length);
+        setMenuItems(Array.isArray(transformedItems) ? transformedItems : []);
+      } else {
+        setMenuItems([]);
+      }
     } catch (err) {
       console.error("[STAFF MENU] Fetch error:", err);
       setError(extractErrorMessage(err));
@@ -76,8 +89,7 @@ export default function StaffMenu() {
       description: item.description || "",
       price: item.price.toString(),
       category: item.category,
-      image: item.image || "",
-      available: item.available,
+      isAvailable: item.isAvailable !== undefined ? item.isAvailable : true,
     });
     setShowForm(true);
   };
@@ -87,9 +99,8 @@ export default function StaffMenu() {
       name: "",
       description: "",
       price: "",
-      category: "MAIN",
-      image: "",
-      available: true,
+      category: "Appetizers",
+      isAvailable: true,
     });
   };
 
@@ -198,12 +209,12 @@ export default function StaffMenu() {
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
-                id="available"
-                checked={formData.available}
-                onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
+                id="isAvailable"
+                checked={formData.isAvailable}
+                onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
                 className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
               />
-              <label htmlFor="available" className="text-sm font-medium text-gray-700">
+              <label htmlFor="isAvailable" className="text-sm font-medium text-gray-700">
                 Available
               </label>
             </div>
@@ -248,7 +259,7 @@ export default function StaffMenu() {
                 <div className="h-40 bg-gray-200 relative overflow-hidden">
                   {item.image ? (
                     <img 
-                      src={item.image.startsWith('http') ? item.image : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${item.image}`}
+                      src={item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${item.image}`}
                       alt={item.name} 
                       className="w-full h-full object-cover" 
                       onError={(e) => {
@@ -266,9 +277,9 @@ export default function StaffMenu() {
                     </div>
                   )}
                   <span className={`absolute top-3 right-3 px-2 py-1 text-xs font-medium rounded ${
-                    item.available ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                    item.isAvailable ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                   }`}>
-                    {item.available ? "Available" : "Unavailable"}
+                    {item.isAvailable ? "Available" : "Unavailable"}
                   </span>
                 </div>
                 <div className="p-4">
