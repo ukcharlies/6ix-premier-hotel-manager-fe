@@ -32,8 +32,8 @@ export default function StaffUploads() {
       const response = await api.get("/uploads");
       console.log("[STAFF UPLOADS] API Response:", response.data);
       
-      // Backend returns { success: true, uploads: [...] }
-      const uploadsData = extractArrayData(response, "uploads");
+      // Backend returns { success: true, data: [...] }
+      const uploadsData = extractArrayData(response, "data");
       console.log("[STAFF UPLOADS] Extracted uploads:", uploadsData);
       
       setUploads(Array.isArray(uploadsData) ? uploadsData : []);
@@ -116,13 +116,10 @@ export default function StaffUploads() {
     }
 
     try {
-      console.log("[STAFF UPLOADS] Deleting upload:", upload);
+      console.log("[STAFF UPLOADS] Deleting upload ID:", upload.id);
       
-      await api.delete("/uploads", { 
-        data: { 
-          filePath: upload.path || `/uploads/${upload.type}/${upload.filename}` 
-        } 
-      });
+      // Use ID in URL path, not in body
+      await api.delete(`/uploads/${upload.id}`);
       
       setSuccess("File deleted successfully!");
       fetchUploads();

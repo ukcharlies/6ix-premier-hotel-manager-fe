@@ -32,19 +32,19 @@ export default function AdminUploads() {
   useEffect(() => {
     fetchUploads();
     fetchStats();
-  }, [selectedType]);
+  }, []); // Remove selectedType dependency since we don't filter by type anymore
 
   const fetchUploads = async () => {
     try {
       setLoading(true);
       setError(null);
-      console.log(`[ADMIN UPLOADS] Fetching uploads for type: ${selectedType}`);
+      console.log("[ADMIN UPLOADS] Fetching all uploads");
 
-      const res = await api.get(`/uploads?type=${selectedType}`);
+      const res = await api.get(`/uploads`);
       console.log("[ADMIN UPLOADS] Response:", res.data);
 
-      // Backend returns { success: true, uploads: [...] }
-      const uploadsData = extractArrayData(res, "uploads");
+      // Backend returns { success: true, data: [...] }
+      const uploadsData = extractArrayData(res, "data");
       console.log("[ADMIN UPLOADS] Extracted uploads:", uploadsData);
 
       setUploads(Array.isArray(uploadsData) ? uploadsData : []);
@@ -139,14 +139,10 @@ export default function AdminUploads() {
     if (!confirm(`Delete "${upload.originalName || upload.filename}"?`)) return;
 
     try {
-      console.log("[ADMIN UPLOADS] Deleting upload:", upload);
+      console.log("[ADMIN UPLOADS] Deleting upload ID:", upload.id);
 
-      await api.delete("/uploads", {
-        data: {
-          filePath:
-            upload.path || `/uploads/${selectedType}/${upload.filename}`,
-        },
-      });
+      // Use ID in URL path, not in body
+      await api.delete(`/uploads/${upload.id}`);
 
       setSuccess("File deleted successfully");
       fetchUploads();

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
+import { extractArrayData, extractErrorMessage } from "../../utils/apiNormalizer";
 
 export default function StaffMenu() {
   const [menuItems, setMenuItems] = useState([]);
@@ -25,13 +26,21 @@ export default function StaffMenu() {
   const fetchMenuItems = async () => {
     try {
       setLoading(true);
+      setError(null);
+      console.log("[STAFF MENU] Fetching menu items");
+      
       const response = await api.get("/menu");
-      if (response.data.success) {
-        setMenuItems(response.data.data);
-      }
+      console.log("[STAFF MENU] API Response:", response.data);
+      
+      // Use apiNormalizer for consistent extraction + fallback
+      const items = extractArrayData(response, "data");
+      console.log("[STAFF MENU] Extracted items:", items);
+      
+      setMenuItems(Array.isArray(items) ? items : []);
     } catch (err) {
-      setError("Failed to load menu items");
-      console.error(err);
+      console.error("[STAFF MENU] Fetch error:", err);
+      setError(extractErrorMessage(err));
+      setMenuItems([]); // ← Explicit fallback: always an array
     } finally {
       setLoading(false);
     }
@@ -92,8 +101,8 @@ export default function StaffMenu() {
     );
   }
 
-  // Group items by category
-  const groupedItems = menuItems.reduce((acc, item) => {
+  // Group items by category (defensive: ensure menuItems is always array)
+  const groupedItems = (Array.isArray(menuItems) ? menuItems : []).reduce((acc, item) => {
     if (!acc[item.category]) {
       acc[item.category] = [];
     }
