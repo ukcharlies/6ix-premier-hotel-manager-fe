@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../services/api";
 import { extractErrorMessage } from "../utils/apiNormalizer";
-import { buildPublicUrl } from "../utils/publicUrl";
+import { buildUploadImageUrl } from "../utils/publicUrl";
 
 export default function UploadPreviewModal({ open, upload, onClose, onLinked }) {
-  const [entityType, setEntityType] = useState(upload?.type || "general");
+  const [entityType, setEntityType] = useState("general");
   const [entityId, setEntityId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -12,11 +12,8 @@ export default function UploadPreviewModal({ open, upload, onClose, onLinked }) 
   const [menuItems, setMenuItems] = useState([]);
   const [entitiesLoading, setEntitiesLoading] = useState(false);
 
-  if (!open || !upload) return null;
-
-  const imageSrc = buildPublicUrl(upload.url || upload.path);
-
   useEffect(() => {
+    if (!upload) return;
     setEntityType(upload?.type || "general");
     setEntityId("");
     setError(null);
@@ -57,6 +54,10 @@ export default function UploadPreviewModal({ open, upload, onClose, onLinked }) 
     if (entityType === "menu") return menuItems;
     return [];
   }, [entityType, rooms, menuItems]);
+
+  if (!open || !upload) return null;
+
+  const imageSrc = buildUploadImageUrl(upload);
 
   const handleLink = async () => {
     if (!entityType) {

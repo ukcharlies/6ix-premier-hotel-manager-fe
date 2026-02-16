@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import MenuItemImageManager from "../../components/MenuItemImageManager";
+import { buildUploadImageUrl } from "../../utils/publicUrl";
 
 export default function AdminMenu() {
   const [menuItems, setMenuItems] = useState([]);
@@ -34,7 +35,14 @@ export default function AdminMenu() {
       setLoading(true);
       const res = await api.get("/menu");
       if (res.data.success) {
-        setMenuItems(res.data.menuItems);
+        const items = Array.isArray(res.data.menuItems) ? res.data.menuItems : [];
+        const enrichedItems = items.map((item) => {
+          const firstUpload = item.menuImages?.[0]?.upload;
+          const imagePath = item.image || item.images?.[0] || firstUpload?.path || null;
+          const imageCount = item.images?.length || item.menuImages?.length || 0;
+          return { ...item, image: imagePath, imageCount };
+        });
+        setMenuItems(enrichedItems);
       }
     } catch (err) {
       console.error("Failed to fetch menu items:", err);
@@ -212,17 +220,45 @@ export default function AdminMenu() {
                 !item.isAvailable ? "opacity-60" : ""
               }`}
             >
+              <div className="h-40 bg-gray-100 relative overflow-hidden">
+                {item.image ? (
+                  <img
+                    src={buildUploadImageUrl(item.image)}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      const fallback = e.currentTarget.nextElementSibling;
+                      if (fallback) fallback.style.display = "flex";
+                    }}
+                  />
+                ) : null}
+                <div
+                  className={`w-full h-full items-center justify-center text-gray-400 ${
+                    item.image ? "hidden" : "flex"
+                  }`}
+                >
+                  <span className="text-sm">No Image</span>
+                </div>
+                <span className="absolute top-3 left-3 px-2 py-1 text-[11px] rounded bg-black/60 text-white">
+                  {item.imageCount || 0} image{(item.imageCount || 0) === 1 ? "" : "s"}
+                </span>
+              </div>
               <div className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <h3 className="font-semibold text-premier-dark">{item.name}</h3>
                     <span className="text-xs text-premier-copper font-medium">{item.category}</span>
                   </div>
-                  <span className="text-lg font-bold text-premier-dark">${item.price?.toFixed(2)}</span>
+                  <span className="text-lg font-bold text-premier-dark">${Number(item.price || 0).toFixed(2)}</span>
                 </div>
                 <p className="text-sm text-gray-500 mb-4 line-clamp-2">
                   {item.description || "No description"}
                 </p>
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                  <span>ID: {item.id}</span>
+                  <span>{item.isAvailable ? "Available" : "Unavailable"}</span>
+                </div>
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                   <button
                     onClick={() => handleToggleAvailability(item)}

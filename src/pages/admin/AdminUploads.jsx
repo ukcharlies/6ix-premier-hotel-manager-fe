@@ -6,7 +6,7 @@ import {
   extractErrorMessage,
 } from "../../utils/apiNormalizer";
 import UploadPreviewModal from "../../components/UploadPreviewModal";
-import { buildPublicUrl } from "../../utils/publicUrl";
+import { buildUploadImageUrl } from "../../utils/publicUrl";
 
 export default function AdminUploads() {
   const [uploads, setUploads] = useState([]);
@@ -336,7 +336,7 @@ export default function AdminUploads() {
                 <div className="aspect-square flex items-center justify-center mb-2 overflow-hidden rounded-lg bg-white">
                   {upload.mimetype?.startsWith("image/") ? (
                     <img
-                      src={buildPublicUrl(upload.url || upload.path)}
+                      src={buildUploadImageUrl(upload)}
                       alt={upload.originalName || upload.filename}
                       className="w-full h-full object-cover cursor-pointer"
                       onClick={() => {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import { extractArrayData, extractStatsData, extractErrorMessage } from "../../utils/apiNormalizer";
 import UploadPreviewModal from "../../components/UploadPreviewModal";
-import { buildPublicUrl } from "../../utils/publicUrl";
+import { buildUploadImageUrl } from "../../utils/publicUrl";
 
 export default function StaffUploads() {
   const [uploads, setUploads] = useState([]);
@@ -308,7 +308,7 @@ export default function StaffUploads() {
               <div key={upload.id} className="group relative">
                 <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                   <img
-                    src={buildPublicUrl(upload.url || upload.path)}
+                    src={buildUploadImageUrl(upload)}
                     alt={upload.originalName || upload.filename}
                     className="w-full h-full object-cover cursor-pointer"
                     onClick={() => {
@@ -331,7 +331,7 @@ export default function StaffUploads() {
                 {/* Hover Actions */}
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
                   <button
-                    onClick={() => copyToClipboard(buildPublicUrl(upload.url || upload.path))}
+                    onClick={() => copyToClipboard(buildUploadImageUrl(upload))}
                     className="p-2 bg-white rounded-full hover:bg-gray-100"
                     title="Copy URL"
                   >
