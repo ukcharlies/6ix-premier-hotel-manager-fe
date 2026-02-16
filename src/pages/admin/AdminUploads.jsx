@@ -1,10 +1,21 @@
 import React, { useEffect, useState, useRef } from "react";
 import api from "../../services/api";
-import { extractArrayData, extractStatsData, extractErrorMessage } from "../../utils/apiNormalizer";
+import {
+  extractArrayData,
+  extractStatsData,
+  extractErrorMessage,
+} from "../../utils/apiNormalizer";
+import UploadPreviewModal from "../../components/UploadPreviewModal";
 
 export default function AdminUploads() {
   const [uploads, setUploads] = useState([]);
-  const [stats, setStats] = useState({ total: 0, totalSizeFormatted: "0 Bytes", byType: {} });
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [activeUpload, setActiveUpload] = useState(null);
+  const [stats, setStats] = useState({
+    total: 0,
+    totalSizeFormatted: "0 Bytes",
+    byType: {},
+  });
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -28,14 +39,14 @@ export default function AdminUploads() {
       setLoading(true);
       setError(null);
       console.log(`[ADMIN UPLOADS] Fetching uploads for type: ${selectedType}`);
-      
+
       const res = await api.get(`/uploads?type=${selectedType}`);
       console.log("[ADMIN UPLOADS] Response:", res.data);
-      
+
       // Backend returns { success: true, uploads: [...] }
       const uploadsData = extractArrayData(res, "uploads");
       console.log("[ADMIN UPLOADS] Extracted uploads:", uploadsData);
-      
+
       setUploads(Array.isArray(uploadsData) ? uploadsData : []);
     } catch (err) {
       console.error("[ADMIN UPLOADS] Failed to fetch uploads:", err);
@@ -51,11 +62,11 @@ export default function AdminUploads() {
       console.log("[ADMIN UPLOADS] Fetching stats");
       const res = await api.get("/uploads/stats");
       console.log("[ADMIN UPLOADS] Stats response:", res.data);
-      
+
       // Extract stats with fallback
       const statsData = extractStatsData(res);
       console.log("[ADMIN UPLOADS] Extracted stats:", statsData);
-      
+
       setStats({
         total: statsData.total || 0,
         totalSizeFormatted: statsData.totalSizeFormatted || "0 Bytes",
@@ -73,7 +84,13 @@ export default function AdminUploads() {
     if (!file) return;
 
     // Validate file type
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
     if (!allowedTypes.includes(file.type)) {
       setError("Only image files (JPEG, PNG, GIF, WebP) are allowed");
       return;
@@ -92,14 +109,16 @@ export default function AdminUploads() {
     try {
       setUploading(true);
       setError(null);
-      console.log(`[ADMIN UPLOADS] Uploading file: ${file.name}, type: ${selectedType}`);
-      
+      console.log(
+        `[ADMIN UPLOADS] Uploading file: ${file.name}, type: ${selectedType}`,
+      );
+
       const res = await api.post("/uploads", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      
+
       console.log("[ADMIN UPLOADS] Upload response:", res.data);
-      
+
       if (res.data.success) {
         setSuccess("File uploaded successfully");
         fetchUploads();
@@ -121,13 +140,14 @@ export default function AdminUploads() {
 
     try {
       console.log("[ADMIN UPLOADS] Deleting upload:", upload);
-      
-      await api.delete("/uploads", { 
-        data: { 
-          filePath: upload.path || `/uploads/${selectedType}/${upload.filename}` 
-        } 
+
+      await api.delete("/uploads", {
+        data: {
+          filePath:
+            upload.path || `/uploads/${selectedType}/${upload.filename}`,
+        },
       });
-      
+
       setSuccess("File deleted successfully");
       fetchUploads();
       fetchStats();
@@ -149,20 +169,41 @@ export default function AdminUploads() {
     const ext = filename.split(".").pop()?.toLowerCase();
     if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
       return (
-        <svg className="w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <svg
+          className="w-8 h-8 text-blue-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.5"
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
       );
     }
     return (
-      <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      <svg
+        className="w-8 h-8 text-gray-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.5"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+        />
       </svg>
     );
   };
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
@@ -191,8 +232,18 @@ export default function AdminUploads() {
               </>
             ) : (
               <>
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                  />
                 </svg>
                 Upload File
               </>
@@ -206,18 +257,28 @@ export default function AdminUploads() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
             <p className="text-sm text-gray-500">Total Files</p>
-            <p className="text-2xl font-bold text-premier-dark">{stats.total || 0}</p>
+            <p className="text-2xl font-bold text-premier-dark">
+              {stats.total || 0}
+            </p>
           </div>
           <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
             <p className="text-sm text-gray-500">Total Size</p>
-            <p className="text-2xl font-bold text-premier-dark">{stats.totalSizeFormatted || "0 Bytes"}</p>
+            <p className="text-2xl font-bold text-premier-dark">
+              {stats.totalSizeFormatted || "0 Bytes"}
+            </p>
           </div>
-          {stats.byType && Object.entries(stats.byType).map(([type, count]) => (
-            <div key={type} className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-              <p className="text-sm text-gray-500 capitalize">{type} Files</p>
-              <p className="text-2xl font-bold text-premier-dark">{count || 0}</p>
-            </div>
-          ))}
+          {stats.byType &&
+            Object.entries(stats.byType).map(([type, count]) => (
+              <div
+                key={type}
+                className="bg-white rounded-xl shadow-sm p-4 border border-gray-100"
+              >
+                <p className="text-sm text-gray-500 capitalize">{type} Files</p>
+                <p className="text-2xl font-bold text-premier-dark">
+                  {count || 0}
+                </p>
+              </div>
+            ))}
         </div>
       )}
 
@@ -225,13 +286,23 @@ export default function AdminUploads() {
       {error && (
         <div className="bg-red-50 text-red-700 p-4 rounded-lg flex items-center justify-between">
           {error}
-          <button onClick={() => setError(null)} className="text-red-700 hover:text-red-900">×</button>
+          <button
+            onClick={() => setError(null)}
+            className="text-red-700 hover:text-red-900"
+          >
+            ×
+          </button>
         </div>
       )}
       {success && (
         <div className="bg-green-50 text-green-700 p-4 rounded-lg flex items-center justify-between">
           {success}
-          <button onClick={() => setSuccess(null)} className="text-green-700 hover:text-green-900">×</button>
+          <button
+            onClick={() => setSuccess(null)}
+            className="text-green-700 hover:text-green-900"
+          >
+            ×
+          </button>
         </div>
       )}
 
@@ -268,11 +339,21 @@ export default function AdminUploads() {
                 <div className="aspect-square flex items-center justify-center mb-2 overflow-hidden rounded-lg bg-white">
                   {upload.mimetype?.startsWith("image/") ? (
                     <img
-                      src={upload.url || `${import.meta.env.VITE_API_URL?.replace('/api', '')}${upload.path}`}
+                      src={
+                        upload.url ||
+                        `${import.meta.env.VITE_API_URL?.replace("/api", "")}${upload.path}`
+                      }
                       alt={upload.originalName || upload.filename}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover cursor-pointer"
+                      onClick={() => {
+                        setActiveUpload(upload);
+                        setPreviewOpen(true);
+                      }}
                       onError={(e) => {
-                        console.error("[ADMIN UPLOADS] Image load error:", upload);
+                        console.error(
+                          "[ADMIN UPLOADS] Image load error:",
+                          upload,
+                        );
                         e.target.style.display = "none";
                         e.target.nextSibling.style.display = "flex";
                       }}
@@ -282,10 +363,15 @@ export default function AdminUploads() {
                     {getFileIcon(upload.filename)}
                   </div>
                 </div>
-                <p className="text-xs text-gray-600 truncate" title={upload.originalName || upload.filename}>
+                <p
+                  className="text-xs text-gray-600 truncate"
+                  title={upload.originalName || upload.filename}
+                >
                   {upload.originalName || upload.filename}
                 </p>
-                <p className="text-xs text-gray-400">{formatFileSize(upload.size)}</p>
+                <p className="text-xs text-gray-400">
+                  {formatFileSize(upload.size)}
+                </p>
 
                 {/* Delete button on hover */}
                 <button
@@ -300,14 +386,40 @@ export default function AdminUploads() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <svg
+              className="w-16 h-16 mx-auto text-gray-300 mb-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
             </svg>
             <p className="text-gray-500">No files in this category</p>
-            <p className="text-sm text-gray-400 mt-1">Upload your first file to get started</p>
+            <p className="text-sm text-gray-400 mt-1">
+              Upload your first file to get started
+            </p>
           </div>
         )}
       </div>
-    </div>
+      </div>
+      <UploadPreviewModal
+        open={previewOpen}
+        upload={activeUpload}
+        onClose={() => {
+          setPreviewOpen(false);
+          setActiveUpload(null);
+        }}
+        onLinked={(updated) => {
+          // Refresh uploads and stats after linking
+          fetchUploads();
+          fetchStats();
+        }}
+      />
+    </>
   );
 }

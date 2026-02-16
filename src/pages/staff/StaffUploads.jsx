@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import { extractArrayData, extractStatsData, extractErrorMessage } from "../../utils/apiNormalizer";
+import UploadPreviewModal from "../../components/UploadPreviewModal";
 
 export default function StaffUploads() {
   const [uploads, setUploads] = useState([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [activeUpload, setActiveUpload] = useState(null);
   const [stats, setStats] = useState({ count: 0, totalSize: "0 KB" });
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -240,7 +243,11 @@ export default function StaffUploads() {
                   <img
                     src={upload.url || `${import.meta.env.VITE_API_URL?.replace('/api', '')}${upload.path}`}
                     alt={upload.originalName || upload.filename}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover cursor-pointer"
+                    onClick={() => {
+                      setActiveUpload(upload);
+                      setPreviewOpen(true);
+                    }}
                     onError={(e) => {
                       console.error("[STAFF UPLOADS] Image load error:", upload);
                       e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ENo Preview%3C/text%3E%3C/svg%3E";
@@ -277,6 +284,19 @@ export default function StaffUploads() {
           </div>
         )}
       </div>
+
+      <UploadPreviewModal
+        open={previewOpen}
+        upload={activeUpload}
+        onClose={() => {
+          setPreviewOpen(false);
+          setActiveUpload(null);
+        }}
+        onLinked={() => {
+          fetchUploads();
+          fetchStats();
+        }}
+      />
     </div>
   );
 }
