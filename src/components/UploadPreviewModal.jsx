@@ -1,31 +1,94 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import api from "../services/api";
 import { extractErrorMessage } from "../utils/apiNormalizer";
+import { buildPublicUrl } from "../utils/publicUrl";
 
 export default function UploadPreviewModal({ open, upload, onClose, onLinked }) {
   const [entityType, setEntityType] = useState(upload?.type || "general");
   const [entityId, setEntityId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [rooms, setRooms] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
+  const [entitiesLoading, setEntitiesLoading] = useState(false);
 
   if (!open || !upload) return null;
 
-  const imageSrc = upload.url || `${import.meta.env.VITE_API_URL?.replace("/api", "")}${upload.path}`;
+  const imageSrc = buildPublicUrl(upload.url || upload.path);
+
+  useEffect(() => {
+    setEntityType(upload?.type || "general");
+    setEntityId("");
+    setError(null);
+  }, [upload?.id]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+
+    const fetchEntities = async () => {
+      setEntitiesLoading(true);
+      try {
+        const [roomsRes, menuRes] = await Promise.all([
+          api.get("/rooms").catch(() => ({ data: { rooms: [] } })),
+          api.get("/menu").catch(() => ({ data: { menuItems: [] } })),
+        ]);
+
+        const roomsData = roomsRes.data?.rooms || roomsRes.data?.data || [];
+        const menuData = menuRes.data?.menuItems || menuRes.data?.data || [];
+
+        if (!cancelled) {
+          setRooms(Array.isArray(roomsData) ? roomsData : []);
+          setMenuItems(Array.isArray(menuData) ? menuData : []);
+        }
+      } finally {
+        if (!cancelled) setEntitiesLoading(false);
+      }
+    };
+
+    fetchEntities();
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  const entityOptions = useMemo(() => {
+    if (entityType === "room") return rooms;
+    if (entityType === "menu") return menuItems;
+    return [];
+  }, [entityType, rooms, menuItems]);
 
   const handleLink = async () => {
-    if (!entityType || !entityId) {
-      setError("Please select an entity type and provide an entity ID to link.");
+    if (!entityType) {
+      setError("Please select an entity type.");
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      const res = await api.post(`/uploads/${upload.id}/link`, { entityType, entityId });
-      if (res?.data?.success) {
-        if (onLinked) onLinked(res.data.upload || upload);
+      if (entityType === "general" || entityType === "user") {
+        if (onLinked) onLinked(upload);
         onClose();
+        return;
       }
+
+      if (!entityId) {
+        setError("Please provide a room/menu item ID.");
+        return;
+      }
+
+      if (entityType === "room") {
+        await api.post(`/images/rooms/${entityId}`, { uploadId: upload.id });
+      } else if (entityType === "menu") {
+        await api.post(`/images/menu-items/${entityId}`, { uploadId: upload.id });
+      } else {
+        setError("Unsupported entity type for linking.");
+        return;
+      }
+
+      if (onLinked) onLinked(upload);
+      onClose();
     } catch (err) {
       console.error("[UPLOAD PREVIEW] Link failed:", err);
       setError(extractErrorMessage(err));
@@ -60,10 +123,47 @@ export default function UploadPreviewModal({ open, upload, onClose, onLinked }) 
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm text-gray-600">Entity ID</label>
-              <input value={entityId} onChange={(e) => setEntityId(e.target.value)} placeholder="e.g. 123" className="w-full mt-1 p-2 border rounded" />
-            </div>
+            {(entityType === "room" || entityType === "menu") && (
+              <div>
+                <label className="block text-sm text-gray-600">
+                  Pick {entityType === "room" ? "Room" : "Menu Item"}
+                </label>
+                <select
+                  value={entityId}
+                  onChange={(e) => setEntityId(e.target.value)}
+                  className="w-full mt-1 p-2 border rounded"
+                  disabled={entitiesLoading}
+                >
+                  <option value="">
+                    {entitiesLoading ? "Loading..." : "Select one"}
+                  </option>
+                  {entityOptions.map((opt) => (
+                    <option key={opt.id} value={opt.id}>
+                      {entityType === "room"
+                        ? `Room ${opt.roomNumber} (${opt.roomType})`
+                        : `${opt.name} (${opt.category})`}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-400 mt-1">
+                  {entityType === "room"
+                    ? "Assigns this upload to the selected room."
+                    : "Assigns this upload to the selected menu item."}
+                </p>
+              </div>
+            )}
+
+            {(entityType === "room" || entityType === "menu") && (
+              <div>
+                <label className="block text-sm text-gray-600">Or enter ID</label>
+                <input
+                  value={entityId}
+                  onChange={(e) => setEntityId(e.target.value)}
+                  placeholder={entityType === "room" ? "Room ID (e.g. 12)" : "Menu item ID (e.g. 5)"}
+                  className="w-full mt-1 p-2 border rounded"
+                />
+              </div>
+            )}
 
             {error && <div className="text-sm text-red-600">{error}</div>}
 

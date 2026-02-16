@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
+import { buildPublicUrl } from "../../utils/publicUrl";
+import RoomImageManager from "../../components/RoomImageManager";
 
 export default function StaffRooms() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [imageManagerOpen, setImageManagerOpen] = useState(false);
+  const [activeRoom, setActiveRoom] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
   const [formData, setFormData] = useState({
@@ -35,9 +39,9 @@ export default function StaffRooms() {
         // Handle different response structures
         const roomsData = response.data.rooms || response.data.data || [];
 
-        // Transform rooms to include image URLs from roomImages junction table
+        // Transform rooms to include image paths (backend may already provide images/image)
         const transformedRooms = roomsData.map((room) => {
-          const imageUrls = room.roomImages?.map((ri) => ri.upload.path) || [];
+          const imageUrls = room.images || room.roomImages?.map((ri) => ri.upload.path) || [];
           return {
             ...room,
             images: imageUrls,
@@ -307,11 +311,7 @@ export default function StaffRooms() {
             <div className="h-48 bg-gray-200 relative overflow-hidden">
               {room.images?.[0] ? (
                 <img
-                  src={
-                    room.images[0].startsWith("http")
-                      ? room.images[0]
-                      : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${room.images[0]}`
-                  }
+                  src={buildPublicUrl(room.images[0])}
                   alt={room.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -384,12 +384,24 @@ export default function StaffRooms() {
                   </span>
                   <span className="text-xs text-gray-500">per night</span>
                 </div>
-                <button
-                  onClick={() => handleEdit(room)}
-                  className="px-4 py-2 text-sm border border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors"
-                >
-                  Edit
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveRoom(room);
+                      setImageManagerOpen(true);
+                    }}
+                    className="px-3 py-2 text-sm border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Images
+                  </button>
+                  <button
+                    onClick={() => handleEdit(room)}
+                    className="px-4 py-2 text-sm border border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors"
+                  >
+                    Edit
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -400,6 +412,18 @@ export default function StaffRooms() {
         <div className="text-center py-12 text-gray-500">
           No rooms found. Click "Add Room" to create your first room.
         </div>
+      )}
+
+      {imageManagerOpen && activeRoom && (
+        <RoomImageManager
+          roomId={activeRoom.id}
+          roomNumber={activeRoom.roomNumber}
+          onClose={async () => {
+            setImageManagerOpen(false);
+            setActiveRoom(null);
+            await fetchRooms();
+          }}
+        />
       )}
     </div>
   );

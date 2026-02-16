@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import { extractArrayData, extractStatsData, extractErrorMessage } from "../../utils/apiNormalizer";
 import UploadPreviewModal from "../../components/UploadPreviewModal";
+import { buildPublicUrl } from "../../utils/publicUrl";
 
 export default function StaffUploads() {
   const [uploads, setUploads] = useState([]);
+  const [selectedFilePreview, setSelectedFilePreview] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [activeUpload, setActiveUpload] = useState(null);
   const [stats, setStats] = useState({ count: 0, totalSize: "0 KB" });
@@ -15,6 +17,8 @@ export default function StaffUploads() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [entityType, setEntityType] = useState("general");
   const [entityId, setEntityId] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [filterUsage, setFilterUsage] = useState("all"); // all | used | unused
 
   const entityTypes = ["general", "room", "menu", "user"];
 
@@ -110,6 +114,16 @@ export default function StaffUploads() {
     }
   };
 
+  useEffect(() => {
+    if (!selectedFile) {
+      setSelectedFilePreview("");
+      return;
+    }
+    const url = URL.createObjectURL(selectedFile);
+    setSelectedFilePreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [selectedFile]);
+
   const handleDelete = async (upload) => {
     if (!window.confirm(`Delete "${upload.originalName || upload.filename}"?`)) {
       return;
@@ -143,6 +157,13 @@ export default function StaffUploads() {
       </div>
     );
   }
+
+  const filteredUploads = uploads.filter((u) => {
+    if (filterType !== "all" && u.type !== filterType) return false;
+    if (filterUsage === "used" && !u.isUsed) return false;
+    if (filterUsage === "unused" && u.isUsed) return false;
+    return true;
+  });
 
   return (
     <div>
@@ -186,6 +207,15 @@ export default function StaffUploads() {
                 onChange={(e) => setSelectedFile(e.target.files[0])}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
+              {selectedFilePreview && (
+                <div className="mt-3 aspect-square max-w-[140px] bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                  <img
+                    src={selectedFilePreview}
+                    alt="Selected preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Entity Type</label>
@@ -227,18 +257,58 @@ export default function StaffUploads() {
       {/* Uploads Grid */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <h2 className="text-lg font-semibold text-premier-dark mb-4">Uploaded Files</h2>
+
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <span className="text-xs text-gray-500 mr-2">Filter:</span>
+          {["all", ...entityTypes].map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setFilterType(t)}
+              className={`px-3 py-1 rounded-full text-xs border transition-colors ${
+                filterType === t
+                  ? "bg-emerald-600 text-white border-emerald-600"
+                  : "bg-white text-gray-600 border-gray-200 hover:border-emerald-300"
+              }`}
+            >
+              {t === "all" ? "All" : t.charAt(0).toUpperCase() + t.slice(1)}
+            </button>
+          ))}
+          <div className="w-px h-5 bg-gray-200 mx-1" />
+          {[
+            { id: "all", label: "All" },
+            { id: "used", label: "Used" },
+            { id: "unused", label: "Unused" },
+          ].map((u) => (
+            <button
+              key={u.id}
+              type="button"
+              onClick={() => setFilterUsage(u.id)}
+              className={`px-3 py-1 rounded-full text-xs border transition-colors ${
+                filterUsage === u.id
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              {u.label}
+            </button>
+          ))}
+          <span className="text-xs text-gray-400 ml-auto">
+            Showing {filteredUploads.length} of {uploads.length}
+          </span>
+        </div>
         
-        {uploads.length === 0 ? (
+        {filteredUploads.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            No files uploaded yet. Use the form above to upload your first file.
+            No uploads match your filter.
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {uploads.map((upload) => (
+            {filteredUploads.map((upload) => (
               <div key={upload.id} className="group relative">
                 <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                   <img
-                    src={upload.url || `${import.meta.env.VITE_API_URL?.replace('/api', '')}${upload.path}`}
+                    src={buildPublicUrl(upload.url || upload.path)}
                     alt={upload.originalName || upload.filename}
                     className="w-full h-full object-cover cursor-pointer"
                     onClick={() => {
@@ -254,11 +324,14 @@ export default function StaffUploads() {
                 <p className="mt-1 text-xs text-gray-500 truncate" title={upload.originalName || upload.filename}>
                   {upload.originalName || upload.filename}
                 </p>
+                <p className="text-[11px] text-gray-400">
+                  {upload.type || "general"} • {upload.isUsed ? "used" : "unused"}
+                </p>
                 
                 {/* Hover Actions */}
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
                   <button
-                    onClick={() => copyToClipboard(upload.url || `${import.meta.env.VITE_API_URL?.replace('/api', '')}${upload.path}`)}
+                    onClick={() => copyToClipboard(buildPublicUrl(upload.url || upload.path))}
                     className="p-2 bg-white rounded-full hover:bg-gray-100"
                     title="Copy URL"
                   >
