@@ -104,8 +104,8 @@ export default function AdminUploads() {
     }
 
     const formData = new FormData();
-    formData.append("file", file);
     formData.append("type", selectedType);
+    formData.append("file", file);
 
     try {
       setUploading(true);

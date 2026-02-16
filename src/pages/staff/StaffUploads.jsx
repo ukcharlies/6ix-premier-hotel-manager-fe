@@ -15,11 +15,8 @@ export default function StaffUploads() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [entityType, setEntityType] = useState("general");
-  const [entityId, setEntityId] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterUsage, setFilterUsage] = useState("all"); // all | used | unused
-
   const entityTypes = ["general", "room", "menu", "user"];
 
   useEffect(() => {
@@ -82,13 +79,10 @@ export default function StaffUploads() {
 
     try {
       const formData = new FormData();
-      formData.append("file", selectedFile); // Changed from "image" to "file"
-      formData.append("type", entityType); // Changed from "entityType" to "type"
-      if (entityId) {
-        formData.append("entityId", entityId);
-      }
+      formData.append("type", "general");
+      formData.append("file", selectedFile);
 
-      console.log("[STAFF UPLOADS] Uploading file:", selectedFile.name, "type:", entityType);
+      console.log("[STAFF UPLOADS] Uploading file:", selectedFile.name, "type: general");
 
       const response = await api.post("/uploads", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -99,8 +93,6 @@ export default function StaffUploads() {
       if (response.data.success) {
         setSuccess("File uploaded successfully!");
         setSelectedFile(null);
-        setEntityType("general");
-        setEntityId("");
         fetchUploads();
         fetchStats();
         // Reset file input
@@ -130,6 +122,13 @@ export default function StaffUploads() {
     setTimeout(() => setSuccess(null), 2000);
   };
 
+  const getUploadType = (upload) => {
+    if (upload?.type) return upload.type;
+    const path = upload?.path || "";
+    const parts = path.split("/").filter(Boolean);
+    return parts[1] || "general";
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -139,7 +138,7 @@ export default function StaffUploads() {
   }
 
   const filteredUploads = uploads.filter((u) => {
-    if (filterType !== "all" && u.type !== filterType) return false;
+    if (filterType !== "all" && getUploadType(u) !== filterType) return false;
     if (filterUsage === "used" && !u.isUsed) return false;
     if (filterUsage === "unused" && u.isUsed) return false;
     return true;
@@ -177,9 +176,9 @@ export default function StaffUploads() {
       <div className="mb-6 p-6 bg-white rounded-xl shadow-sm border border-gray-100">
         <h2 className="text-lg font-semibold text-premier-dark mb-4">Upload New File</h2>
         <form onSubmit={handleUpload} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-end">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Image File</label>
               <input
                 id="file-input"
                 type="file"
@@ -187,6 +186,9 @@ export default function StaffUploads() {
                 onChange={(e) => setSelectedFile(e.target.files[0])}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Upload first, then assign to a room or menu item from preview/link actions.
+              </p>
               {selectedFilePreview && (
                 <div className="mt-3 aspect-square max-w-[140px] bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                   <img
@@ -198,39 +200,15 @@ export default function StaffUploads() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Entity Type</label>
-              <select
-                value={entityType}
-                onChange={(e) => setEntityType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              <button
+                type="submit"
+                disabled={uploading || !selectedFile}
+                className="w-full md:w-auto px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {entityTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Entity ID (optional)
-              </label>
-              <input
-                type="text"
-                value={entityId}
-                onChange={(e) => setEntityId(e.target.value)}
-                placeholder="e.g., room ID"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              />
+                {uploading ? "Uploading..." : "Upload File"}
+              </button>
             </div>
           </div>
-          <button
-            type="submit"
-            disabled={uploading || !selectedFile}
-            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {uploading ? "Uploading..." : "Upload File"}
-          </button>
         </form>
       </div>
 
@@ -305,7 +283,7 @@ export default function StaffUploads() {
                   {upload.originalName || upload.filename}
                 </p>
                 <p className="text-[11px] text-gray-400">
-                  {upload.type || "general"} • {upload.isUsed ? "used" : "unused"}
+                  {getUploadType(upload)} • {upload.isUsed ? "used" : "unused"}
                 </p>
                 
                 {/* Hover Actions */}
