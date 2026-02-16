@@ -26,7 +26,8 @@ export function buildPublicUrl(pathOrUrl) {
     return normalizeLegacyApiUploadUrl(pathOrUrl);
   }
   const origin = stripTrailingSlash(getApiOrigin());
-  const path = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
+  const normalizedPath = normalizeLegacyApiUploadUrl(pathOrUrl);
+  const path = normalizedPath.startsWith("/") ? normalizedPath : `/${normalizedPath}`;
   return `${origin}${path}`;
 }
 

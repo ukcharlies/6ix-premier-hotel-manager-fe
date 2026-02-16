@@ -18,6 +18,7 @@ export default function AdminRooms() {
     description: "",
     pricePerNight: "",
     capacity: "",
+    amenities: "",
     status: "AVAILABLE",
   });
 
@@ -55,6 +56,12 @@ export default function AdminRooms() {
         ...form,
         pricePerNight: parseFloat(form.pricePerNight),
         capacity: parseInt(form.capacity),
+        amenities: form.amenities
+          ? form.amenities
+              .split(",")
+              .map((amenity) => amenity.trim())
+              .filter(Boolean)
+          : [],
       };
 
       if (editingRoom) {
@@ -80,6 +87,7 @@ export default function AdminRooms() {
       description: room.description || "",
       pricePerNight: room.pricePerNight.toString(),
       capacity: room.capacity.toString(),
+      amenities: Array.isArray(room.amenities) ? room.amenities.join(", ") : "",
       status: room.status,
     });
     setShowModal(true);
@@ -106,6 +114,7 @@ export default function AdminRooms() {
       description: "",
       pricePerNight: "",
       capacity: "",
+      amenities: "",
       status: "AVAILABLE",
     });
     setEditingRoom(null);
@@ -169,6 +178,7 @@ export default function AdminRooms() {
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Type</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Price/Night</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Capacity</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Amenities</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Status</th>
                 <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
               </tr>
@@ -185,6 +195,27 @@ export default function AdminRooms() {
                       ${room.pricePerNight?.toFixed(2)}
                     </td>
                     <td className="py-3 px-4 text-gray-600">{room.capacity} guests</td>
+                    <td className="py-3 px-4 text-gray-600 max-w-[260px]">
+                      {Array.isArray(room.amenities) && room.amenities.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {room.amenities.slice(0, 4).map((amenity) => (
+                            <span
+                              key={`${room.id}-${amenity}`}
+                              className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700"
+                            >
+                              {amenity}
+                            </span>
+                          ))}
+                          {room.amenities.length > 4 ? (
+                            <span className="px-2 py-0.5 text-xs rounded-full bg-gray-50 text-gray-500">
+                              +{room.amenities.length - 4} more
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-sm">No amenities</span>
+                      )}
+                    </td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[room.status]}`}>
                         {room.status}
@@ -217,7 +248,7 @@ export default function AdminRooms() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="py-8 text-center text-gray-500">
+                  <td colSpan="7" className="py-8 text-center text-gray-500">
                     No rooms found. Add your first room!
                   </td>
                 </tr>
@@ -294,6 +325,18 @@ export default function AdminRooms() {
                     required
                   />
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Amenities (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={form.amenities}
+                  onChange={(e) => setForm({ ...form, amenities: e.target.value })}
+                  placeholder="WiFi, TV, Mini Bar, Air Conditioning"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-premier-copper"
+                />
               </div>
               {editingRoom && (
                 <div>
