@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import { extractArrayData, extractErrorMessage } from "../utils/apiNormalizer";
+import { buildUploadImageUrl } from "../utils/publicUrl";
 
 export default function MenuItemImageManager({
   menuItemId,
@@ -90,10 +91,7 @@ export default function MenuItemImageManager({
     }
   };
 
-  const getImageUrl = (path) => {
-    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-    return `${baseUrl}${path}`;
-  };
+  const getImageUrl = (upload) => buildUploadImageUrl(upload);
 
   const assignedImageIds = menuImages.map(
     (img) => img.upload?.id || img.uploadId,
@@ -206,7 +204,7 @@ export default function MenuItemImageManager({
                   return (
                     <div key={menuImage.id} className="relative group">
                       <img
-                        src={getImageUrl(upload.path)}
+                        src={getImageUrl(upload)}
                         alt={upload.originalName}
                         className="w-full h-40 object-cover rounded-lg border-2 border-gray-200"
                       />
@@ -249,7 +247,7 @@ export default function MenuItemImageManager({
                   .map((upload) => (
                     <div key={upload.id} className="relative group">
                       <img
-                        src={getImageUrl(upload.path)}
+                        src={getImageUrl(upload)}
                         alt={upload.originalName}
                         className="w-full h-40 object-cover rounded-lg border-2 border-gray-200"
                       />

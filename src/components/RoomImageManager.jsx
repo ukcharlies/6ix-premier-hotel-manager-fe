@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import { extractArrayData, extractErrorMessage } from "../utils/apiNormalizer";
+import { buildUploadImageUrl } from "../utils/publicUrl";
 
 export default function RoomImageManager({ roomId, roomNumber, onClose }) {
   const [uploads, setUploads] = useState([]);
@@ -86,10 +87,7 @@ export default function RoomImageManager({ roomId, roomNumber, onClose }) {
     }
   };
 
-  const getImageUrl = (path) => {
-    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-    return `${baseUrl}${path}`;
-  };
+  const getImageUrl = (upload) => buildUploadImageUrl(upload);
 
   const assignedImageIds = roomImages.map(
     (img) => img.upload?.id || img.uploadId,
@@ -202,7 +200,7 @@ export default function RoomImageManager({ roomId, roomNumber, onClose }) {
                   return (
                     <div key={roomImage.id} className="relative group">
                       <img
-                        src={getImageUrl(upload.path)}
+                        src={getImageUrl(upload)}
                         alt={upload.originalName}
                         className="w-full h-40 object-cover rounded-lg border-2 border-gray-200"
                       />
@@ -245,7 +243,7 @@ export default function RoomImageManager({ roomId, roomNumber, onClose }) {
                   .map((upload) => (
                     <div key={upload.id} className="relative group">
                       <img
-                        src={getImageUrl(upload.path)}
+                        src={getImageUrl(upload)}
                         alt={upload.originalName}
                         className="w-full h-40 object-cover rounded-lg border-2 border-gray-200"
                       />
