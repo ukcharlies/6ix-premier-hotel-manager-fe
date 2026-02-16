@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/Authcontext";
 import api from "../../services/api";
+import { buildPublicUrl } from "../../utils/publicUrl";
 
 // Stat Card Component
 function StatCard({ title, value, icon: Icon, color, link }) {
@@ -92,15 +93,25 @@ export default function StaffDashboard() {
         console.log("[STAFF DASHBOARD] Uploads response:", uploadsRes.data);
 
         // Extract data with fallbacks
-        const roomsData = roomsRes.data?.rooms || roomsRes.data?.data || [];
-        const menuData = menuRes.data?.menuItems || menuRes.data?.data || [];
+        const roomsDataRaw = roomsRes.data?.rooms || roomsRes.data?.data || [];
+        const menuDataRaw = menuRes.data?.menuItems || menuRes.data?.data || [];
         const uploadsData = uploadsRes.data?.stats || uploadsRes.data?.data || {};
 
-        setRooms(Array.isArray(roomsData) ? roomsData.slice(0, 6) : []);
-        setMenuItems(Array.isArray(menuData) ? menuData.slice(0, 6) : []);
+        const roomsData = (Array.isArray(roomsDataRaw) ? roomsDataRaw : []).map((room) => {
+          const images = room.roomImages?.map((ri) => ri.upload?.path).filter(Boolean) || [];
+          return { ...room, images };
+        });
+
+        const menuData = (Array.isArray(menuDataRaw) ? menuDataRaw : []).map((item) => {
+          const images = item.menuImages?.map((mi) => mi.upload?.path).filter(Boolean) || [];
+          return { ...item, images, image: images[0] || null };
+        });
+
+        setRooms(roomsData.slice(0, 6));
+        setMenuItems(menuData.slice(0, 6));
         setStats({
-          rooms: Array.isArray(roomsData) ? roomsData.length : 0,
-          menuItems: Array.isArray(menuData) ? menuData.length : 0,
+          rooms: roomsData.length,
+          menuItems: menuData.length,
           uploads: uploadsData.total || uploadsData.count || 0,
           bookings: 0, // Placeholder until bookings are implemented
         });
@@ -263,21 +274,52 @@ export default function StaffDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {rooms.map((room) => (
               <div key={room.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h3 className="font-semibold text-premier-dark">{room.name}</h3>
-                    <p className="text-sm text-gray-500">{room.type}</p>
+                <div className="flex gap-3">
+                  <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden border border-gray-200 flex-shrink-0">
+                    {room.images?.[0] ? (
+                      <img
+                        src={buildPublicUrl(room.images[0])}
+                        alt={`Room ${room.roomNumber}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "/room.jpg";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                        No Image
+                      </div>
+                    )}
                   </div>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    room.available ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                  }`}>
-                    {room.available ? "Available" : "Unavailable"}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 line-clamp-2 mb-3">{room.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-emerald-600">${Number(room.price).toFixed(2)}</span>
-                  <span className="text-sm text-gray-500">{room.capacity} guests</span>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between mb-1">
+                      <div>
+                        <h3 className="font-semibold text-premier-dark">
+                          Room {room.roomNumber}
+                        </h3>
+                        <p className="text-sm text-gray-500">{room.roomType}</p>
+                      </div>
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          room.status === "AVAILABLE"
+                            ? "bg-green-100 text-green-700"
+                            : room.status === "OCCUPIED"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {room.status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-2">{room.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-bold text-emerald-600">
+                        ${Number(room.pricePerNight || 0).toFixed(2)}
+                      </span>
+                      <span className="text-sm text-gray-500">{room.capacity} guests</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -297,20 +339,45 @@ export default function StaffDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {menuItems.map((item) => (
               <div key={item.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h3 className="font-semibold text-premier-dark">{item.name}</h3>
-                    <p className="text-xs text-amber-600 font-medium">{item.category}</p>
+                <div className="flex gap-3">
+                  <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden border border-gray-200 flex-shrink-0">
+                    {item.image ? (
+                      <img
+                        src={buildPublicUrl(item.image)}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                        No Image
+                      </div>
+                    )}
                   </div>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    item.available ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                  }`}>
-                    {item.available ? "Available" : "Unavailable"}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 line-clamp-2 mb-3">{item.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-amber-600">${Number(item.price).toFixed(2)}</span>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between mb-1">
+                      <div>
+                        <h3 className="font-semibold text-premier-dark">{item.name}</h3>
+                        <p className="text-xs text-amber-600 font-medium">{item.category}</p>
+                      </div>
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          item.isAvailable ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {item.isAvailable ? "Available" : "Unavailable"}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-2">{item.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-bold text-amber-600">
+                        ${Number(item.price || 0).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}

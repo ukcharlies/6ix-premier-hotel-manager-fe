@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import { extractArrayData, extractErrorMessage } from "../../utils/apiNormalizer";
+import { buildUploadImageUrl } from "../../utils/publicUrl";
+import MenuItemImageManager from "../../components/MenuItemImageManager";
 
 export default function StaffMenu() {
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [imageManagerOpen, setImageManagerOpen] = useState(false);
+  const [activeItem, setActiveItem] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({
@@ -35,13 +39,14 @@ export default function StaffMenu() {
         const items = response.data.menuItems || response.data.data || [];
         console.log("[STAFF MENU] Raw items:", items);
         
-        // Transform menu items to include image URLs from menuImages junction table
+        // Transform menu items to include image paths (backend may already provide images/image)
         const transformedItems = items.map(item => {
-          const imageUrls = item.menuImages?.map(mi => mi.upload.path) || [];
+          const imageUrls = item.images || item.menuImages?.map(mi => mi.upload.path) || [];
           return {
             ...item,
             image: imageUrls[0] || null, // Use first image as main image
             images: imageUrls, // Keep all images
+            imageCount: imageUrls.length,
           };
         });
         
@@ -189,13 +194,18 @@ export default function StaffMenu() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-              <input
-                type="text"
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>
+              <button
+                type="button"
+                disabled={!editingItem}
+                onClick={() => {
+                  setActiveItem(editingItem);
+                  setImageManagerOpen(true);
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-left hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {editingItem ? "Manage images for this item" : "Save item first to manage images"}
+              </button>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -259,7 +269,7 @@ export default function StaffMenu() {
                 <div className="h-40 bg-gray-200 relative overflow-hidden">
                   {item.image ? (
                     <img 
-                      src={item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${item.image}`}
+                      src={buildUploadImageUrl(item.image)}
                       alt={item.name} 
                       className="w-full h-full object-cover" 
                       onError={(e) => {
@@ -281,20 +291,39 @@ export default function StaffMenu() {
                   }`}>
                     {item.isAvailable ? "Available" : "Unavailable"}
                   </span>
+                  <span className="absolute top-3 left-3 px-2 py-1 text-[11px] rounded bg-black/60 text-white">
+                    {item.imageCount || 0} image{(item.imageCount || 0) === 1 ? "" : "s"}
+                  </span>
                 </div>
                 <div className="p-4">
                   <div className="mb-2">
                     <h3 className="font-semibold text-premier-dark">{item.name}</h3>
                     <p className="text-sm text-gray-500 line-clamp-2 mt-1">{item.description}</p>
                   </div>
+                  <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                    <span>ID: {item.id}</span>
+                    <span>{item.category}</span>
+                  </div>
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-lg font-bold text-emerald-600">${Number(item.price).toFixed(2)}</span>
-                    <button
-                      onClick={() => handleEdit(item)}
-                      className="px-3 py-1 text-sm border border-emerald-600 text-emerald-600 rounded hover:bg-emerald-50"
-                    >
-                      Edit
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveItem(item);
+                          setImageManagerOpen(true);
+                        }}
+                        className="px-3 py-1 text-sm border border-gray-200 text-gray-700 rounded hover:bg-gray-50"
+                      >
+                        Images
+                      </button>
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="px-3 py-1 text-sm border border-emerald-600 text-emerald-600 rounded hover:bg-emerald-50"
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -302,6 +331,18 @@ export default function StaffMenu() {
           </div>
         </div>
       ))}
+
+      {imageManagerOpen && activeItem && (
+        <MenuItemImageManager
+          menuItemId={activeItem.id}
+          menuItemName={activeItem.name}
+          onClose={async () => {
+            setImageManagerOpen(false);
+            setActiveItem(null);
+            await fetchMenuItems();
+          }}
+        />
+      )}
     </div>
   );
 }
