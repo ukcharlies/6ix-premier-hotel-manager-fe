@@ -25,13 +25,21 @@ export default function MenuItemImageManager({
       setLoading(true);
       setError(null);
 
+      console.log("[MENU IMAGE] Fetching data for menuItemId:", menuItemId);
+
       const [uploadsRes, imagesRes] = await Promise.all([
         api.get("/images/available"),
         api.get(`/images/menu-items/${menuItemId}`),
       ]);
 
+      console.log("[MENU IMAGE] Uploads response:", uploadsRes.data);
+      console.log("[MENU IMAGE] Menu images response:", imagesRes.data);
+
       const uploadData = extractArrayData(uploadsRes, "data");
       const imageData = extractArrayData(imagesRes, "data");
+
+      console.log("[MENU IMAGE] Extracted uploads:", uploadData.length);
+      console.log("[MENU IMAGE] Extracted menu images:", imageData.length);
 
       setUploads(Array.isArray(uploadData) ? uploadData : []);
       setMenuImages(Array.isArray(imageData) ? imageData : []);
@@ -83,7 +91,7 @@ export default function MenuItemImageManager({
   };
 
   const getImageUrl = (path) => {
-    const baseUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
     return `${baseUrl}${path}`;
   };
 

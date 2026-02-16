@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
+import MenuItemImageManager from "../../components/MenuItemImageManager";
 
 export default function AdminMenu() {
   const [menuItems, setMenuItems] = useState([]);
@@ -10,6 +11,8 @@ export default function AdminMenu() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showImageManager, setShowImageManager] = useState(false);
+  const [selectedMenuItem, setSelectedMenuItem] = useState(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -231,6 +234,15 @@ export default function AdminMenu() {
                   </button>
                   <div className="flex items-center gap-2">
                     <button
+                      onClick={() => {
+                        setSelectedMenuItem(item);
+                        setShowImageManager(true);
+                      }}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      Images
+                    </button>
+                    <button
                       onClick={() => handleEdit(item)}
                       className="text-premier-copper hover:text-primary-600 text-sm font-medium"
                     >
@@ -339,6 +351,19 @@ export default function AdminMenu() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Image Manager Modal */}
+      {showImageManager && selectedMenuItem && (
+        <MenuItemImageManager
+          menuItemId={selectedMenuItem.id}
+          menuItemName={selectedMenuItem.name}
+          onClose={() => {
+            setShowImageManager(false);
+            setSelectedMenuItem(null);
+            fetchMenuItems(); // Refresh to show updated images
+          }}
+        />
       )}
     </div>
   );

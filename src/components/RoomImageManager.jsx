@@ -21,13 +21,21 @@ export default function RoomImageManager({ roomId, roomNumber, onClose }) {
       setLoading(true);
       setError(null);
 
+      console.log("[ROOM IMAGE] Fetching data for roomId:", roomId);
+
       const [uploadsRes, imagesRes] = await Promise.all([
         api.get("/images/available"),
         api.get(`/images/rooms/${roomId}`),
       ]);
 
+      console.log("[ROOM IMAGE] Uploads response:", uploadsRes.data);
+      console.log("[ROOM IMAGE] Room images response:", imagesRes.data);
+
       const uploadData = extractArrayData(uploadsRes, "data");
       const imageData = extractArrayData(imagesRes, "data");
+
+      console.log("[ROOM IMAGE] Extracted uploads:", uploadData.length);
+      console.log("[ROOM IMAGE] Extracted room images:", imageData.length);
 
       setUploads(Array.isArray(uploadData) ? uploadData : []);
       setRoomImages(Array.isArray(imageData) ? imageData : []);
@@ -79,7 +87,7 @@ export default function RoomImageManager({ roomId, roomNumber, onClose }) {
   };
 
   const getImageUrl = (path) => {
-    const baseUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
     return `${baseUrl}${path}`;
   };
 
