@@ -31,7 +31,7 @@ export default function Navbar() {
 
   const publicLinks = [
     { name: "Home", path: "/" },
-    { name: "Restaurant", path: "/restaurant" },
+    { name: "Menu", path: "/menu" },
     { name: "Special Offers", path: "/offers" },
     { name: "Rooms", path: "/rooms" },
     { name: "Recreational Facilities", path: "/facilities" },

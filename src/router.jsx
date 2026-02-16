@@ -23,6 +23,7 @@ import RecreationalFacilities from "./pages/RecreationalFacilities";
 // Protected Pages
 import Dashboard from "./pages/Dashboard";
 import Rooms from "./pages/Rooms";
+import Menu from "./pages/Menu";
 import Bookings from "./pages/Bookings";
 import Profile from "./pages/Profile";
 import ChangePassword from "./pages/ChangePassword";
@@ -171,6 +172,17 @@ function AppRouter() {
                       <ProtectedRoute>
                         <PageShell>
                           <Rooms />
+                        </PageShell>
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/menu"
+                    element={
+                      <ProtectedRoute>
+                        <PageShell>
+                          <Menu />
                         </PageShell>
                       </ProtectedRoute>
                     }
