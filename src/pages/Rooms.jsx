@@ -98,60 +98,81 @@ export default function Rooms() {
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 md:p-5">
+      {/* Filters Card */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search room number, type, description"
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-premier-copper"
-          />
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-premier-copper"
-          >
-            <option value="">All Types</option>
-            {roomTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-premier-copper"
-          >
-            <option value="">All Statuses</option>
-            {ROOM_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-          <input
-            type="number"
-            min="1"
-            value={minCapacity}
-            onChange={(e) => setMinCapacity(e.target.value)}
-            placeholder="Min Capacity"
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-premier-copper"
-          />
-          <input
-            type="number"
-            min="0"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
-            placeholder="Max Price"
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-premier-copper"
-          />
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase">Search</label>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Room #, type..."
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-transparent text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase">Type</label>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-transparent text-sm"
+            >
+              <option value="">All Types</option>
+              {roomTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-transparent text-sm"
+            >
+              <option value="">All Statuses</option>
+              {ROOM_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase">Min Guests</label>
+            <input
+              type="number"
+              min="1"
+              value={minCapacity}
+              onChange={(e) => setMinCapacity(e.target.value)}
+              placeholder="Capacity"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-transparent text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase">Max Price</label>
+            <input
+              type="number"
+              min="0"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              placeholder="Price"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-transparent text-sm"
+            />
+          </div>
         </div>
       </div>
 
+      {/* No Results */}
       {filteredRooms.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border border-gray-100">
-          <p className="text-gray-500">No rooms match your current filters.</p>
+        <div className="text-center py-20 bg-white rounded-xl border border-gray-100">
+          <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <p className="text-gray-500 font-medium">No rooms match your filters</p>
+          <p className="text-gray-400 text-sm mt-1">Try adjusting your search criteria</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -161,102 +182,134 @@ export default function Rooms() {
             const hasImages = images.length > 0;
             const activeImage = hasImages ? images[currentIndex % images.length] : "";
             const amenities = Array.isArray(room.amenities) ? room.amenities : [];
+            const hasMultipleImages = images.length > 1;
 
             return (
               <article
                 key={room.id}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group"
               >
-                <div className="relative h-60 bg-gray-100">
+                {/* Image Container */}
+                <div className="relative h-72 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                   {hasImages ? (
                     <img
                       src={activeImage}
                       alt={`Room ${room.roomNumber}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         e.currentTarget.style.display = "none";
-                        const fallback = e.currentTarget.nextElementSibling;
-                        if (fallback) fallback.style.display = "flex";
                       }}
                     />
                   ) : null}
-                  <div className={`${hasImages ? "hidden" : "flex"} w-full h-full items-center justify-center text-gray-400`}>
-                    <span>No image uploaded</span>
+                  <div className={hasImages ? "hidden" : "absolute inset-0 flex flex-col items-center justify-center text-gray-400"}>
+                    <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-xs">No Images</span>
                   </div>
-                  <span className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-semibold ${statusClasses[room.status] || "bg-gray-100 text-gray-700"}`}>
+
+                  {/* Status Badge */}
+                  <div className={`absolute top-3 left-3 px-3 py-1.5 rounded-full text-xs font-bold text-white backdrop-blur-sm ${statusClasses[room.status] || "bg-gray-600/70"}`}>
                     {room.status}
-                  </span>
-                  <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-semibold bg-black/60 text-white">
-                    {images.length} image{images.length === 1 ? "" : "s"}
-                  </span>
-                  {images.length > 1 && (
+                  </div>
+
+                  {/* Image Navigation */}
+                  {hasMultipleImages && (
                     <>
                       <button
                         type="button"
                         onClick={() => moveImage(room.id, images.length, "prev")}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 text-white hover:bg-black/70"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/90 hover:bg-white text-gray-700 shadow-lg hover:shadow-xl transition-all"
                         aria-label="Previous room image"
                       >
-                        ‹
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                        </svg>
                       </button>
                       <button
                         type="button"
                         onClick={() => moveImage(room.id, images.length, "next")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 text-white hover:bg-black/70"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/90 hover:bg-white text-gray-700 shadow-lg hover:shadow-xl transition-all"
                         aria-label="Next room image"
                       >
-                        ›
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                        </svg>
                       </button>
                     </>
                   )}
+
+                  {/* Image Counter & Gallery */}
+                  <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                    {hasMultipleImages && (
+                      <div className="bg-black/70 text-white px-2.5 py-1.5 rounded-full text-xs font-semibold min-w-[45px] text-center backdrop-blur-sm">
+                        {currentIndex + 1}/{images.length}
+                      </div>
+                    )}
+                    <span className="bg-black/70 text-white px-2.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm">
+                      {images.length} photo{images.length === 1 ? "" : "s"}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="p-5 space-y-3">
+                {/* Content */}
+                <div className="p-6 space-y-4">
+                  {/* Header */}
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h2 className="text-xl font-bold text-premier-dark">Room {room.roomNumber}</h2>
-                      <p className="text-sm text-gray-500">{room.roomType}</p>
+                      <h2 className="text-2xl font-bold text-premier-dark">Room {room.roomNumber}</h2>
+                      <p className="text-sm font-semibold text-premier-copper uppercase tracking-wide mt-1">
+                        {room.roomType}
+                      </p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right bg-premier-copper/10 px-3 py-2 rounded-lg">
                       <p className="text-2xl font-bold text-premier-copper">
                         ${Number(room.pricePerNight || 0).toFixed(2)}
                       </p>
-                      <p className="text-xs text-gray-500">per night</p>
+                      <p className="text-xs text-gray-600">per night</p>
                     </div>
                   </div>
 
-                  <p className="text-gray-600 text-sm min-h-[40px]">
+                  {/* Description */}
+                  <p className="text-gray-600 text-sm line-clamp-2">
                     {room.description || "No description provided for this room."}
                   </p>
 
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="rounded-lg bg-gray-50 px-3 py-2">
-                      <p className="text-gray-500">Capacity</p>
-                      <p className="font-semibold text-premier-dark">{room.capacity} guests</p>
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg bg-gray-50 px-3 py-2.5 border border-gray-100">
+                      <p className="text-xs text-gray-600 font-medium">Capacity</p>
+                      <p className="text-lg font-bold text-premier-dark">{room.capacity}</p>
+                      <p className="text-xs text-gray-500">guests</p>
                     </div>
-                    <div className="rounded-lg bg-gray-50 px-3 py-2">
-                      <p className="text-gray-500">Room ID</p>
-                      <p className="font-semibold text-premier-dark">#{room.id}</p>
+                    <div className="rounded-lg bg-gray-50 px-3 py-2.5 border border-gray-100">
+                      <p className="text-xs text-gray-600 font-medium">Status</p>
+                      <p className={`text-lg font-bold ${
+                        room.status === "AVAILABLE" ? "text-emerald-700" :
+                        room.status === "OCCUPIED" ? "text-blue-700" :
+                        "text-amber-700"
+                      }`}>
+                        {room.status}
+                      </p>
                     </div>
                   </div>
 
-                  <div>
-                    <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">Amenities</p>
-                    {amenities.length > 0 ? (
+                  {/* Amenities */}
+                  {amenities.length > 0 && (
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-gray-600 font-semibold mb-2.5">Amenities</p>
                       <div className="flex flex-wrap gap-2">
                         {amenities.map((amenity) => (
                           <span
                             key={`${room.id}-${amenity}`}
-                            className="px-2.5 py-1 text-xs rounded-full bg-premier-light text-premier-dark border border-dark-100"
+                            className="px-2.5 py-1.5 text-xs rounded-full bg-gradient-to-r from-premier-dark/5 to-premier-copper/5 text-premier-dark border border-premier-dark/10 font-medium"
                           >
-                            {amenity}
+                            ✓ {amenity}
                           </span>
                         ))}
                       </div>
-                    ) : (
-                      <p className="text-sm text-gray-400">No amenities listed</p>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </article>
             );
