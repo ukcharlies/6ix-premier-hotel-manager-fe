@@ -17,7 +17,7 @@ export default function Rooms() {
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [minCapacity, setMinCapacity] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
+  const [budget, setBudget] = useState("");
   const [activeImageIndex, setActiveImageIndex] = useState({});
 
   useEffect(() => {
@@ -58,10 +58,10 @@ export default function Rooms() {
       if (typeFilter && room.roomType !== typeFilter) return false;
       if (statusFilter && roomStatus !== statusFilter) return false;
       if (minCapacity && roomCapacity < Number(minCapacity)) return false;
-      if (maxPrice && roomPrice > Number(maxPrice)) return false;
+      if (budget && roomPrice > Number(budget)) return false;
       return true;
     });
-  }, [rooms, search, typeFilter, statusFilter, minCapacity, maxPrice]);
+  }, [rooms, search, typeFilter, statusFilter, minCapacity, budget]);
 
   const getRoomImages = (room) => {
     const imagePaths = Array.isArray(room.images)
@@ -94,7 +94,7 @@ export default function Rooms() {
       <div className="rounded-2xl bg-gradient-to-r from-premier-dark to-dark-700 text-white px-6 py-8">
         <h1 className="text-3xl font-bold">Rooms</h1>
         <p className="text-white/80 mt-1">
-          Browse room inventory with pricing, status, amenities, and gallery previews.
+          Explore available rooms with detailed pricing, amenities, and full image galleries.
         </p>
       </div>
 
@@ -152,13 +152,13 @@ export default function Rooms() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase">Max Price</label>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase">Budget</label>
             <input
               type="number"
               min="0"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              placeholder="Price"
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
+              placeholder="Your budget"
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-transparent text-sm"
             />
           </div>

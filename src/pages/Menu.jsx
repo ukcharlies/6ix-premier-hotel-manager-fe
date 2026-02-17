@@ -75,9 +75,9 @@ export default function Menu() {
     <div className="space-y-6">
       {/* Header with gradient */}
       <div className="rounded-2xl bg-gradient-to-r from-premier-dark to-dark-700 text-white px-6 py-8">
-        <h1 className="text-4xl font-bold">Restaurant Menu</h1>
+        <h1 className="text-4xl font-bold">Menu</h1>
         <p className="text-white/80 mt-2 max-w-2xl">
-          Discover our carefully curated selection of dishes with live availability, pricing, and gallery views.
+          Explore our restaurant's menu with live availability and stunning food photography.
         </p>
       </div>
 
