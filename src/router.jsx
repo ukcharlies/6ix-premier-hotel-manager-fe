@@ -33,6 +33,7 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminRooms from "./pages/admin/AdminRooms";
 import AdminMenu from "./pages/admin/AdminMenu";
+import AdminBookings from "./pages/admin/AdminBookings";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminUploads from "./pages/admin/AdminUploads";
 
@@ -70,6 +71,7 @@ function AppRouter() {
               <Route index element={<AdminDashboard />} />
               <Route path="rooms" element={<AdminRooms />} />
               <Route path="menu" element={<AdminMenu />} />
+              <Route path="bookings" element={<AdminBookings />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="uploads" element={<AdminUploads />} />
             </Route>
@@ -169,22 +171,18 @@ function AppRouter() {
                   <Route
                     path="/rooms"
                     element={
-                      <ProtectedRoute>
-                        <PageShell>
-                          <Rooms />
-                        </PageShell>
-                      </ProtectedRoute>
+                      <PageShell>
+                        <Rooms />
+                      </PageShell>
                     }
                   />
 
                   <Route
                     path="/menu"
                     element={
-                      <ProtectedRoute>
-                        <PageShell>
-                          <Menu />
-                        </PageShell>
-                      </ProtectedRoute>
+                      <PageShell>
+                        <Menu />
+                      </PageShell>
                     }
                   />
 

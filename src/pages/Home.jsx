@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CircularGallery from "../components/CircularGallery";
 import RoomShowcase from "../components/RoomShowcase";
 import TextPressure from "../components/TextPressure";
@@ -104,6 +105,7 @@ function MonthCalendar({ monthDate, startDate, endDate, onSelectDay }) {
 }
 
 export default function Home() {
+  const navigate = useNavigate();
   const galleryItems = [
     { image: "/king.jpg", text: "Signature King Suite" },
     { image: "/room.jpg", text: "Premier Double" },
@@ -144,6 +146,7 @@ export default function Home() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [guestOpen, setGuestOpen] = useState(false);
   const [guests, setGuests] = useState({ adults: 2, children: 0 });
+  const [searchError, setSearchError] = useState("");
   const datePickerRef = useRef(null);
   const guestRef = useRef(null);
 
@@ -183,6 +186,7 @@ export default function Home() {
   );
 
   const handleSelectDay = (day) => {
+    setSearchError("");
     if (!startDate || (startDate && endDate)) {
       setStartDate(day);
       setEndDate(null);
@@ -198,10 +202,26 @@ export default function Home() {
 
   const adjustGuests = (type, delta) => {
     setGuests((prev) => {
-      const next = { ...prev, [type]: Math.max(0, prev[type] + delta) };
-      if (next.adults === 0 && next.children > 0) next.children = 0;
+      const minValue = type === "adults" ? 1 : 0;
+      const next = { ...prev, [type]: Math.max(minValue, prev[type] + delta) };
       return next;
     });
+  };
+
+  const handleSearchStays = () => {
+    if (!startDate || !endDate) {
+      setSearchError("Please select both check-in and check-out dates.");
+      return;
+    }
+
+    const totalGuests = guests.adults + guests.children;
+    const params = new URLSearchParams({
+      checkInDate: startDate.toISOString().slice(0, 10),
+      checkOutDate: endDate.toISOString().slice(0, 10),
+      guests: String(totalGuests),
+    });
+
+    navigate(`/rooms?${params.toString()}`);
   };
 
   return (
@@ -449,11 +469,18 @@ export default function Home() {
               </div>
 
               <div className="w-full">
-                <button className="w-full bg-premier-copper hover:bg-primary-600 text-white font-semibold rounded-2xl py-4 shadow-lg transition-colors">
+                <button
+                  type="button"
+                  onClick={handleSearchStays}
+                  className="w-full bg-premier-copper hover:bg-primary-600 text-white font-semibold rounded-2xl py-4 shadow-lg transition-colors"
+                >
                   Search Luxury Stays
                 </button>
               </div>
             </div>
+            {searchError ? (
+              <p className="mt-3 text-sm text-red-600 font-medium">{searchError}</p>
+            ) : null}
           </div>
         </div>
       </section>
