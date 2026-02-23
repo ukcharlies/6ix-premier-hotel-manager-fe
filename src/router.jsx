@@ -23,8 +23,10 @@ import RecreationalFacilities from "./pages/RecreationalFacilities";
 // Protected Pages
 import Dashboard from "./pages/Dashboard";
 import Rooms from "./pages/Rooms";
+import RoomBooking from "./pages/RoomBooking";
 import Menu from "./pages/Menu";
 import Bookings from "./pages/Bookings";
+import BookingPaymentResult from "./pages/BookingPaymentResult";
 import Profile from "./pages/Profile";
 import ChangePassword from "./pages/ChangePassword";
 
@@ -98,144 +100,169 @@ function AppRouter() {
             <Route
               path="*"
               element={
-              <div className="min-h-screen bg-premier-light flex flex-col">
-                <Navbar />
-                <main className="flex-1">
-                  <ErrorBoundary>
-                    <Routes>
-                      <Route path="/" element={<Home />} />
-                      <Route path="/functions" element={<Functions />} />
-                      <Route path="/facilities" element={<RecreationalFacilities />} />
+                <div className="min-h-screen bg-premier-light flex flex-col">
+                  <Navbar />
+                  <main className="flex-1">
+                    <ErrorBoundary>
+                      <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/functions" element={<Functions />} />
+                        <Route
+                          path="/facilities"
+                          element={<RecreationalFacilities />}
+                        />
 
-                  {/* Public Routes */}
-                  <Route
-                    path="/login"
-                    element={
-                      currentUser ? (
-                        <Navigate to="/dashboard" />
-                      ) : (
-                        <PageShell>
-                          <Login />
-                        </PageShell>
-                      )
-                    }
-                  />
-                  <Route
-                    path="/register"
-                    element={
-                      currentUser ? (
-                        <Navigate to="/dashboard" />
-                      ) : (
-                        <PageShell>
-                          <Register />
-                        </PageShell>
-                      )
-                    }
-                  />
-                  <Route
-                    path="/verify-email"
-                    element={
-                      <PageShell>
-                        <VerifyEmail />
-                      </PageShell>
-                    }
-                  />
-                  <Route
-                    path="/forgot-password"
-                    element={
-                      <PageShell>
-                        <ForgotPassword />
-                      </PageShell>
-                    }
-                  />
-                  <Route
-                    path="/reset-password/:token"
-                    element={
-                      <PageShell>
-                        <ResetPassword />
-                      </PageShell>
-                    }
-                  />
+                        {/* Public Routes */}
+                        <Route
+                          path="/login"
+                          element={
+                            currentUser ? (
+                              <Navigate to="/dashboard" />
+                            ) : (
+                              <PageShell>
+                                <Login />
+                              </PageShell>
+                            )
+                          }
+                        />
+                        <Route
+                          path="/register"
+                          element={
+                            currentUser ? (
+                              <Navigate to="/dashboard" />
+                            ) : (
+                              <PageShell>
+                                <Register />
+                              </PageShell>
+                            )
+                          }
+                        />
+                        <Route
+                          path="/verify-email"
+                          element={
+                            <PageShell>
+                              <VerifyEmail />
+                            </PageShell>
+                          }
+                        />
+                        <Route
+                          path="/forgot-password"
+                          element={
+                            <PageShell>
+                              <ForgotPassword />
+                            </PageShell>
+                          }
+                        />
+                        <Route
+                          path="/reset-password/:token"
+                          element={
+                            <PageShell>
+                              <ResetPassword />
+                            </PageShell>
+                          }
+                        />
 
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <ProtectedRoute>
-                        <PageShell>
-                          <Dashboard />
-                        </PageShell>
-                      </ProtectedRoute>
-                    }
-                  />
+                        <Route
+                          path="/dashboard"
+                          element={
+                            <ProtectedRoute>
+                              <PageShell>
+                                <Dashboard />
+                              </PageShell>
+                            </ProtectedRoute>
+                          }
+                        />
 
-                  <Route
-                    path="/rooms"
-                    element={
-                      <PageShell>
-                        <Rooms />
-                      </PageShell>
-                    }
-                  />
+                        <Route
+                          path="/rooms"
+                          element={
+                            <PageShell>
+                              <Rooms />
+                            </PageShell>
+                          }
+                        />
 
-                  <Route
-                    path="/menu"
-                    element={
-                      <PageShell>
-                        <Menu />
-                      </PageShell>
-                    }
-                  />
+                        <Route
+                          path="/rooms/:roomId/book"
+                          element={
+                            <PageShell>
+                              <RoomBooking />
+                            </PageShell>
+                          }
+                        />
 
-                  <Route
-                    path="/bookings"
-                    element={
-                      <ProtectedRoute>
-                        <PageShell>
-                          <Bookings />
-                        </PageShell>
-                      </ProtectedRoute>
-                    }
-                  />
+                        <Route
+                          path="/menu"
+                          element={
+                            <ProtectedRoute>
+                              <PageShell>
+                                <Menu />
+                              </PageShell>
+                            </ProtectedRoute>
+                          }
+                        />
 
-                  <Route
-                    path="/profile"
-                    element={
-                      <ProtectedRoute>
-                        <PageShell>
-                          <Profile />
-                        </PageShell>
-                      </ProtectedRoute>
-                    }
-                  />
+                        <Route
+                          path="/bookings"
+                          element={
+                            <ProtectedRoute>
+                              <PageShell>
+                                <Bookings />
+                              </PageShell>
+                            </ProtectedRoute>
+                          }
+                        />
 
-                  <Route
-                    path="/settings/change-password"
-                    element={
-                      <ProtectedRoute>
-                        <PageShell>
-                          <ChangePassword />
-                        </PageShell>
-                      </ProtectedRoute>
-                    }
-                  />
+                        <Route
+                          path="/bookings/payment-result"
+                          element={
+                            <ProtectedRoute>
+                              <PageShell>
+                                <BookingPaymentResult />
+                              </PageShell>
+                            </ProtectedRoute>
+                          }
+                        />
 
-                  <Route
-                    path="*"
-                    element={
-                      <PageShell>
-                        <NotFound />
-                      </PageShell>
-                    }
-                  />
-                </Routes>
-                  </ErrorBoundary>
-              </main>
-              <Footer />
-            </div>
-          }
-        />
-      </Routes>
-      </SessionProvider>
+                        <Route
+                          path="/profile"
+                          element={
+                            <ProtectedRoute>
+                              <PageShell>
+                                <Profile />
+                              </PageShell>
+                            </ProtectedRoute>
+                          }
+                        />
+
+                        <Route
+                          path="/settings/change-password"
+                          element={
+                            <ProtectedRoute>
+                              <PageShell>
+                                <ChangePassword />
+                              </PageShell>
+                            </ProtectedRoute>
+                          }
+                        />
+
+                        <Route
+                          path="*"
+                          element={
+                            <PageShell>
+                              <NotFound />
+                            </PageShell>
+                          }
+                        />
+                      </Routes>
+                    </ErrorBoundary>
+                  </main>
+                  <Footer />
+                </div>
+              }
+            />
+          </Routes>
+        </SessionProvider>
       </ErrorBoundary>
     </BrowserRouter>
   );
