@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../services/api";
-import { useAuth } from "../contexts/Authcontext";
 import { buildUploadImageUrl } from "../utils/publicUrl";
+import StaySearchPanel from "../components/StaySearchPanel";
 
 const ROOM_STATUSES = ["AVAILABLE", "OCCUPIED", "MAINTENANCE"];
 
@@ -32,9 +32,7 @@ const formatDate = (value) =>
   });
 
 export default function Rooms() {
-  const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [rooms, setRooms] = useState([]);
@@ -47,12 +45,13 @@ export default function Rooms() {
   const [activeImageIndex, setActiveImageIndex] = useState({});
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info");
-  const [bookingRoomId, setBookingRoomId] = useState(null);
   const [availabilityMeta, setAvailabilityMeta] = useState(null);
   const [availabilityInput, setAvailabilityInput] = useState({
     checkInDate: "",
     checkOutDate: "",
-    guests: "1",
+    adults: 2,
+    children: 0,
+    guests: 2,
   });
 
   const isAvailabilityMode = Boolean(availabilityMeta);
@@ -102,11 +101,16 @@ export default function Rooms() {
   useEffect(() => {
     const queryCheckIn = searchParams.get("checkInDate");
     const queryCheckOut = searchParams.get("checkOutDate");
-    const queryGuests = searchParams.get("guests") || "1";
+    const queryAdults = Number(searchParams.get("adults") || 2);
+    const queryChildren = Number(searchParams.get("children") || 0);
+    const queryGuests =
+      Number(searchParams.get("guests")) || Math.max(1, queryAdults + Math.ceil(queryChildren / 2));
 
     setAvailabilityInput({
       checkInDate: queryCheckIn || "",
       checkOutDate: queryCheckOut || "",
+      adults: queryAdults,
+      children: queryChildren,
       guests: queryGuests,
     });
 
@@ -164,16 +168,12 @@ export default function Rooms() {
     });
   };
 
-  const applyAvailabilitySearch = () => {
-    if (!availabilityInput.checkInDate || !availabilityInput.checkOutDate) {
-      setBanner("Select both check-in and check-out dates.", "error");
-      return;
-    }
-
-    const guests = Math.max(1, Number(availabilityInput.guests || 1));
+  const applyAvailabilitySearch = ({ checkInDate, checkOutDate, adults, children, guests }) => {
     const params = new URLSearchParams({
-      checkInDate: availabilityInput.checkInDate,
-      checkOutDate: availabilityInput.checkOutDate,
+      checkInDate,
+      checkOutDate,
+      adults: String(adults),
+      children: String(children),
       guests: String(guests),
     });
     setSearchParams(params);
@@ -183,47 +183,15 @@ export default function Rooms() {
     setSearchParams({});
   };
 
-  const handleBookRoom = async (room) => {
-    if (!availabilityInput.checkInDate || !availabilityInput.checkOutDate || nights <= 0) {
-      setBanner("Select valid check-in and check-out dates before booking.", "error");
-      return;
-    }
+  const handleBookRoom = (room) => {
+    const params = new URLSearchParams();
+    if (availabilityInput.checkInDate) params.set("checkInDate", availabilityInput.checkInDate);
+    if (availabilityInput.checkOutDate) params.set("checkOutDate", availabilityInput.checkOutDate);
+    params.set("adults", String(availabilityInput.adults || 2));
+    params.set("children", String(availabilityInput.children || 0));
+    params.set("guests", String(Math.max(1, Number(availabilityInput.guests || 1))));
 
-    if (!currentUser) {
-      navigate("/login", {
-        state: {
-          from: { pathname: "/rooms", search: location.search },
-          message: "Sign in to complete this booking.",
-        },
-      });
-      return;
-    }
-
-    if (currentUser.role === "STAFF") {
-      navigate("/staff/bookings");
-      return;
-    }
-    if (currentUser.role === "ADMIN") {
-      navigate("/admin/bookings");
-      return;
-    }
-
-    try {
-      setBookingRoomId(room.id);
-      await api.post("/bookings", {
-        roomId: room.id,
-        checkInDate: availabilityInput.checkInDate,
-        checkOutDate: availabilityInput.checkOutDate,
-        numberOfGuests: Math.max(1, Number(availabilityInput.guests || 1)),
-      });
-      setBanner("Booking submitted successfully. You can track status in My Bookings.", "success");
-      navigate("/bookings");
-    } catch (error) {
-      console.error("[ROOMS] Booking create error:", error);
-      setBanner(error.response?.data?.message || "Unable to complete booking", "error");
-    } finally {
-      setBookingRoomId(null);
-    }
+    navigate(`/rooms/${room.id}/book?${params.toString()}`);
   };
 
   if (loading) {
@@ -258,57 +226,21 @@ export default function Rooms() {
       ) : null}
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase">Check-in</label>
-            <input
-              type="date"
-              value={availabilityInput.checkInDate}
-              onChange={(event) =>
-                setAvailabilityInput((prev) => ({ ...prev, checkInDate: event.target.value }))
-              }
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-transparent text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase">Check-out</label>
-            <input
-              type="date"
-              value={availabilityInput.checkOutDate}
-              onChange={(event) =>
-                setAvailabilityInput((prev) => ({ ...prev, checkOutDate: event.target.value }))
-              }
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-transparent text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase">Guests</label>
-            <input
-              type="number"
-              min="1"
-              value={availabilityInput.guests}
-              onChange={(event) =>
-                setAvailabilityInput((prev) => ({ ...prev, guests: event.target.value }))
-              }
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-premier-copper focus:border-transparent text-sm"
-            />
-          </div>
-          <div className="flex items-end gap-2">
+        <StaySearchPanel
+          initialValues={availabilityInput}
+          buttonLabel="Check Availability"
+          onSearch={applyAvailabilitySearch}
+        />
+
+        <div className="flex justify-end">
+          {isAvailabilityMode ? (
             <button
-              onClick={applyAvailabilitySearch}
-              className="w-full px-3 py-2.5 bg-premier-copper text-white rounded-lg hover:bg-primary-600 transition-colors text-sm font-semibold"
+              onClick={clearAvailabilitySearch}
+              className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
             >
-              Check Availability
+              Reset Search
             </button>
-            {isAvailabilityMode ? (
-              <button
-                onClick={clearAvailabilitySearch}
-                className="px-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-              >
-                Reset
-              </button>
-            ) : null}
-          </div>
+          ) : null}
         </div>
 
         {isAvailabilityMode ? (
@@ -318,8 +250,8 @@ export default function Rooms() {
             </p>
             <p className="text-gray-600 mt-1">
               Stay: {formatDate(availabilityMeta.checkInDate)} to {formatDate(availabilityMeta.checkOutDate)} •{" "}
-              {availabilityMeta.guests} guest{availabilityMeta.guests > 1 ? "s" : ""} • {nights} night
-              {nights !== 1 ? "s" : ""}
+              {availabilityMeta.guests} effective guest{availabilityMeta.guests > 1 ? "s" : ""} •{" "}
+              {nights} night{nights !== 1 ? "s" : ""} • Children counted with 2 children (0-7) = 1 guest
             </p>
           </div>
         ) : (
@@ -524,14 +456,9 @@ export default function Rooms() {
 
                   <button
                     onClick={() => handleBookRoom(room)}
-                    disabled={bookingRoomId === room.id}
-                    className="w-full px-4 py-2.5 rounded-lg bg-premier-copper text-white font-semibold hover:bg-primary-600 transition-colors disabled:opacity-70"
+                    className="w-full px-4 py-2.5 rounded-lg bg-premier-copper text-white font-semibold hover:bg-primary-600 transition-colors"
                   >
-                    {bookingRoomId === room.id
-                      ? "Booking..."
-                      : isAvailabilityMode
-                        ? "Reserve This Room"
-                        : "Select Dates to Reserve"}
+                    Book This Room Now
                   </button>
                 </div>
               </article>

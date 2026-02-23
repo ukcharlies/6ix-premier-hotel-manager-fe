@@ -17,6 +17,7 @@ export default function Login() {
   // Check if redirected due to session expiry
   const sessionExpired = location.state?.sessionExpired;
   const sessionMessage = location.state?.message;
+  const redirectFrom = location.state?.from;
 
   const validateForm = () => {
     const newErrors = {};
@@ -56,7 +57,13 @@ export default function Login() {
     try {
       const res = await auth.login(formData.email, formData.password);
       if (res?.data?.success) {
-        navigate("/dashboard");
+        const role = res.data?.user?.role;
+        const fallbackPath =
+          role === "ADMIN" ? "/admin" : role === "STAFF" ? "/staff" : "/dashboard";
+        const redirectPath = redirectFrom?.pathname
+          ? `${redirectFrom.pathname}${redirectFrom.search || ""}`
+          : fallbackPath;
+        navigate(redirectPath, { replace: true });
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Login failed";

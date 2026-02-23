@@ -73,7 +73,7 @@ export default function StaffDashboard() {
         console.log("[STAFF DASHBOARD] Fetching stats...");
         
         // Fetch stats from various endpoints with fallbacks
-        const [roomsRes, menuRes, uploadsRes] = await Promise.all([
+        const [roomsRes, menuRes, uploadsRes, bookingsRes] = await Promise.all([
           api.get("/rooms").catch(err => {
             console.error("[STAFF DASHBOARD] Rooms error:", err);
             return { data: { rooms: [], data: [] } };
@@ -86,16 +86,22 @@ export default function StaffDashboard() {
             console.error("[STAFF DASHBOARD] Uploads error:", err);
             return { data: { stats: { total: 0 }, data: { count: 0 } } };
           }),
+          api.get("/bookings").catch(err => {
+            console.error("[STAFF DASHBOARD] Bookings error:", err);
+            return { data: { bookings: [] } };
+          }),
         ]);
 
         console.log("[STAFF DASHBOARD] Rooms response:", roomsRes.data);
         console.log("[STAFF DASHBOARD] Menu response:", menuRes.data);
         console.log("[STAFF DASHBOARD] Uploads response:", uploadsRes.data);
+        console.log("[STAFF DASHBOARD] Bookings response:", bookingsRes.data);
 
         // Extract data with fallbacks
         const roomsDataRaw = roomsRes.data?.rooms || roomsRes.data?.data || [];
         const menuDataRaw = menuRes.data?.menuItems || menuRes.data?.data || [];
         const uploadsData = uploadsRes.data?.stats || uploadsRes.data?.data || {};
+        const bookingsData = Array.isArray(bookingsRes.data?.bookings) ? bookingsRes.data.bookings : [];
 
         const roomsData = (Array.isArray(roomsDataRaw) ? roomsDataRaw : []).map((room) => {
           const images = room.roomImages?.map((ri) => ri.upload?.path).filter(Boolean) || [];
@@ -113,7 +119,7 @@ export default function StaffDashboard() {
           rooms: roomsData.length,
           menuItems: menuData.length,
           uploads: uploadsData.total || uploadsData.count || 0,
-          bookings: 0, // Placeholder until bookings are implemented
+          bookings: bookingsData.length,
         });
       } catch (error) {
         console.error("[STAFF DASHBOARD] Failed to fetch stats:", error);
