@@ -38,6 +38,7 @@ import AdminMenu from "./pages/admin/AdminMenu";
 import AdminBookings from "./pages/admin/AdminBookings";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminUploads from "./pages/admin/AdminUploads";
+import AdminAuditTrail from "./pages/admin/AdminAuditTrail";
 
 // Staff Pages
 import StaffLayout from "./pages/staff/StaffLayout";
@@ -76,6 +77,7 @@ function AppRouter() {
               <Route path="bookings" element={<AdminBookings />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="uploads" element={<AdminUploads />} />
+              <Route path="audit-trail" element={<AdminAuditTrail />} />
             </Route>
 
             {/* Staff Routes - separate layout without Navbar/Footer */}
