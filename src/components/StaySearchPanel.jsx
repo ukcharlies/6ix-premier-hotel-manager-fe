@@ -51,7 +51,7 @@ function toDate(value) {
   return parsed;
 }
 
-function MonthCalendar({ monthDate, startDate, endDate, onSelectDay }) {
+function MonthCalendar({ monthDate, startDate, endDate, onSelectDay, today }) {
   const year = monthDate.getFullYear();
   const month = monthDate.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -68,6 +68,12 @@ function MonthCalendar({ monthDate, startDate, endDate, onSelectDay }) {
     return [...placeholders, ...realDays];
   }, [daysInMonth, offset, month, year]);
 
+  const isPast = (date) => {
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    return d < t;
+  };
+
   return (
     <div className="w-full">
       <div className="grid grid-cols-7 gap-2 lg:gap-3 text-center text-sm font-medium text-dark-400 mb-4">
@@ -83,14 +89,17 @@ function MonthCalendar({ monthDate, startDate, endDate, onSelectDay }) {
             <button
               key={item.key}
               type="button"
-              onClick={() => onSelectDay(item.date)}
+              disabled={isPast(item.date)}
+              onClick={() => !isPast(item.date) && onSelectDay(item.date)}
               className={[
                 "h-10 lg:h-12 rounded-full text-sm lg:text-base transition-all duration-150 font-medium",
-                isSameDay(item.date, startDate) || isSameDay(item.date, endDate)
-                  ? "bg-premier-copper text-white shadow-md"
-                  : isInRange(item.date, startDate, endDate)
-                    ? "bg-premier-light text-premier-dark"
-                    : "text-premier-dark hover:bg-premier-light/80",
+                isPast(item.date)
+                  ? "text-gray-300 cursor-not-allowed"
+                  : isSameDay(item.date, startDate) || isSameDay(item.date, endDate)
+                    ? "bg-premier-copper text-white shadow-md"
+                    : isInRange(item.date, startDate, endDate)
+                      ? "bg-premier-light text-premier-dark"
+                      : "text-premier-dark hover:bg-premier-light/80",
               ].join(" ")}
             >
               {item.date.getDate()}
@@ -122,6 +131,7 @@ export default function StaySearchPanel({
   const [searchError, setSearchError] = useState("");
   const datePickerRef = useRef(null);
   const guestRef = useRef(null);
+  const today = useMemo(() => new Date(), []);
 
   useEffect(() => {
     const nextStart = toDate(initialValues?.checkInDate);
@@ -164,6 +174,10 @@ export default function StaySearchPanel({
 
   const handleSelectDay = (day) => {
     setSearchError("");
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const selected = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+    if (selected < todayStart) return;
+
     if (!startDate || (startDate && endDate)) {
       setStartDate(day);
       setEndDate(null);
@@ -187,6 +201,14 @@ export default function StaySearchPanel({
   const handleSearch = () => {
     if (!startDate || !endDate) {
       setSearchError("Please select both check-in and check-out dates.");
+      return;
+    }
+
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const checkInDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+
+    if (checkInDay < todayStart) {
+      setSearchError("Check-in date cannot be in the past. Please select today or a future date.");
       return;
     }
 
@@ -273,6 +295,7 @@ export default function StaySearchPanel({
                     startDate={startDate}
                     endDate={endDate}
                     onSelectDay={handleSelectDay}
+                    today={today}
                   />
                 </div>
                 <div>
@@ -287,6 +310,7 @@ export default function StaySearchPanel({
                     startDate={startDate}
                     endDate={endDate}
                     onSelectDay={handleSelectDay}
+                    today={today}
                   />
                 </div>
               </div>
