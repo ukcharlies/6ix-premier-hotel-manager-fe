@@ -236,7 +236,7 @@ export default function Menu() {
                   {/* Price & Actions */}
                   <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                     <div className="text-2xl font-bold text-premier-copper">
-                      ${Number(item.price || 0).toFixed(2)}
+                      ₦{Number(item.price || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                     {hasMultipleImages && (
                       <span className="text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full font-medium">

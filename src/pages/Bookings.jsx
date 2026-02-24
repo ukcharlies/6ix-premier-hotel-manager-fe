@@ -96,7 +96,7 @@ export default function Bookings() {
         <div className="bg-white rounded-xl border border-gray-100 p-5">
           <p className="text-sm text-gray-500">Total Value</p>
           <p className="text-3xl font-bold text-premier-dark mt-1">
-            ${Number(summary.totalRevenue || 0).toFixed(2)}
+            ₦{Number(summary.totalRevenue || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-5 flex items-center">
@@ -179,7 +179,7 @@ export default function Bookings() {
 
                     <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                       <p className="text-xl font-bold text-premier-copper">
-                        ${Number(booking.totalAmount || 0).toFixed(2)}
+                        ₦{Number(booking.totalAmount || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                       {["PENDING", "CONFIRMED"].includes(booking.status) ? (
                         <button

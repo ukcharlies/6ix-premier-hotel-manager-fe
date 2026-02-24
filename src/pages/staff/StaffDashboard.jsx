@@ -321,7 +321,7 @@ export default function StaffDashboard() {
                     <p className="text-sm text-gray-600 line-clamp-2 mb-2">{room.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-bold text-emerald-600">
-                        ${Number(room.pricePerNight || 0).toFixed(2)}
+                        ₦{Number(room.pricePerNight || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                       <span className="text-sm text-gray-500">{room.capacity} guests</span>
                     </div>
@@ -380,7 +380,7 @@ export default function StaffDashboard() {
                     <p className="text-sm text-gray-600 line-clamp-2 mb-2">{item.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-bold text-amber-600">
-                        ${Number(item.price || 0).toFixed(2)}
+                        ₦{Number(item.price || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
                   </div>

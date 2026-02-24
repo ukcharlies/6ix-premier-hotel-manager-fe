@@ -305,7 +305,7 @@ export default function StaffMenu() {
                     <span>{item.category}</span>
                   </div>
                   <div className="flex items-center justify-between mt-3">
-                    <span className="text-lg font-bold text-emerald-600">${Number(item.price).toFixed(2)}</span>
+                    <span className="text-lg font-bold text-emerald-600">₦{Number(item.price || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"

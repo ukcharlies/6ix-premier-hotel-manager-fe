@@ -41,7 +41,7 @@ const toDateInput = (value) => {
   return date.toISOString().slice(0, 10);
 };
 
-const formatMoney = (value) => `$${Number(value || 0).toFixed(2)}`;
+const formatMoney = (value) => `₦${Number(value || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const formatDate = (value) =>
   new Date(value).toLocaleDateString("en-US", {

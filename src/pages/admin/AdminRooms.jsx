@@ -192,7 +192,7 @@ export default function AdminRooms() {
                     </td>
                     <td className="py-3 px-4 text-gray-600">{room.roomType}</td>
                     <td className="py-3 px-4 font-medium text-premier-dark">
-                      ${room.pricePerNight?.toFixed(2)}
+                      ₦{Number(room.pricePerNight || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="py-3 px-4 text-gray-600">{room.capacity} guests</td>
                     <td className="py-3 px-4 text-gray-600 max-w-[260px]">

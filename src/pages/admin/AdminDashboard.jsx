@@ -74,7 +74,7 @@ const BookingRow = ({ booking }) => {
         </span>
       </td>
       <td className="py-3 px-4 text-right font-medium text-premier-dark">
-        ${booking.totalAmount?.toFixed(2)}
+        ₦{Number(booking.totalAmount || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </td>
     </tr>
   );
@@ -168,7 +168,7 @@ export default function AdminDashboard() {
         />
         <StatCard
           title="Revenue (30 days)"
-          value={`$${(stats?.revenue?.thisMonth || 0).toLocaleString()}`}
+          value={`₦${(stats?.revenue?.thisMonth || 0).toLocaleString()}`}
           color="bg-purple-100 text-purple-600"
           icon={
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">

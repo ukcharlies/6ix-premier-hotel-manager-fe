@@ -380,7 +380,7 @@ export default function StaffRooms() {
               <div className="flex items-center justify-between">
                 <div className="flex flex-col">
                   <span className="text-2xl font-bold text-emerald-600">
-                    ${room.pricePerNight ? Number(room.pricePerNight).toFixed(2) : "0.00"}
+                    ₦{room.pricePerNight ? Number(room.pricePerNight).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
                   </span>
                   <span className="text-xs text-gray-500">per night</span>
                 </div>

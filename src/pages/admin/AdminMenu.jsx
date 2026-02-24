@@ -250,7 +250,7 @@ export default function AdminMenu() {
                     <h3 className="font-semibold text-premier-dark">{item.name}</h3>
                     <span className="text-xs text-premier-copper font-medium">{item.category}</span>
                   </div>
-                  <span className="text-lg font-bold text-premier-dark">${Number(item.price || 0).toFixed(2)}</span>
+                  <span className="text-lg font-bold text-premier-dark">₦{Number(item.price || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <p className="text-sm text-gray-500 mb-4 line-clamp-2">
                   {item.description || "No description"}

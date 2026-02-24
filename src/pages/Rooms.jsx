@@ -12,7 +12,7 @@ const statusClasses = {
   MAINTENANCE: "bg-amber-100 text-amber-700",
 };
 
-const formatMoney = (value) => `$${Number(value || 0).toFixed(2)}`;
+const formatMoney = (value) => `₦${Number(value || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const calculateNights = (checkInDate, checkOutDate) => {
   if (!checkInDate || !checkOutDate) return 0;
