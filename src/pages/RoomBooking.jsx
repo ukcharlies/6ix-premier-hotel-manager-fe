@@ -5,7 +5,7 @@ import { useAuth } from "../contexts/Authcontext";
 import StaySearchPanel from "../components/StaySearchPanel";
 import { buildUploadImageUrl } from "../utils/publicUrl";
 
-const formatMoney = (value) => `$${Number(value || 0).toFixed(2)}`;
+const formatMoney = (value) => `₦${Number(value || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const formatDate = (value) =>
   new Date(value).toLocaleDateString("en-US", {
@@ -148,12 +148,14 @@ export default function RoomBooking() {
       window.location.assign(paymentLink);
     } catch (error) {
       console.error("[ROOM BOOKING] booking/payment error:", error);
-      setMessage(
+      const errorMsg =
         error.response?.data?.message ||
           error.message ||
-          "Unable to proceed to payment. Please try again.",
-      );
+          "Unable to proceed to payment. Please try again.";
+      setMessage(errorMsg);
       setMessageType("error");
+      // Scroll to the message so user can see the error
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setProcessing(false);
     }
