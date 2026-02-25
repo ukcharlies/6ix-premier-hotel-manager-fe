@@ -2,20 +2,22 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import api from "../services/api";
 import { getApiOrigin } from "../utils/publicUrl";
 
-const STATUS_OPTIONS = [
-  "PENDING",
-  "CONFIRMED",
-  "CHECKED_IN",
-  "CHECKED_OUT",
-  "CANCELLED",
-];
-
+const STATUS_OPTIONS = ["PENDING", "CONFIRMED", "CHECKED_IN", "CHECKED_OUT", "CANCELLED"];
+const DRAGGABLE_STATUSES = new Set(["PENDING", "CONFIRMED", "CHECKED_IN"]);
 const STATUS_BADGES = {
   PENDING: "bg-amber-100 text-amber-800",
   CONFIRMED: "bg-blue-100 text-blue-800",
   CHECKED_IN: "bg-emerald-100 text-emerald-800",
   CHECKED_OUT: "bg-slate-100 text-slate-700",
   CANCELLED: "bg-rose-100 text-rose-800",
+};
+
+const STATUS_BAR = {
+  PENDING: "bg-amber-500",
+  CONFIRMED: "bg-blue-600",
+  CHECKED_IN: "bg-emerald-600",
+  CHECKED_OUT: "bg-slate-500",
+  CANCELLED: "bg-rose-500",
 };
 
 const THEME = {
@@ -35,19 +37,34 @@ const THEME = {
   },
 };
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+const ROOM_COL_WIDTH = 230;
+const DAY_COL_WIDTH = 64;
+
 const toDateInput = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString().slice(0, 10);
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
+  return local.toISOString().slice(0, 10);
 };
 
-const formatMoney = (value) => `₦${Number(value || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const formatMoney = (value) =>
+  `₦${Number(value || 0).toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 
 const formatDate = (value) =>
   new Date(value).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
+  });
+
+const formatDayLabel = (value) =>
+  new Date(value).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
   });
 
 const calculateNights = (checkInDate, checkOutDate) => {
@@ -57,7 +74,7 @@ const calculateNights = (checkInDate, checkOutDate) => {
   if (Number.isNaN(checkIn.getTime()) || Number.isNaN(checkOut.getTime())) return 0;
   const diff = checkOut.getTime() - checkIn.getTime();
   if (diff <= 0) return 0;
-  return Math.max(1, Math.ceil(diff / (24 * 60 * 60 * 1000)));
+  return Math.max(1, Math.ceil(diff / DAY_MS));
 };
 
 const normalizeDay = (value) => {
@@ -66,17 +83,66 @@ const normalizeDay = (value) => {
   return date;
 };
 
-const buildDaysInRange = (fromDate, toDate) => {
+const addDays = (value, days) => {
+  const date = normalizeDay(value);
+  date.setDate(date.getDate() + days);
+  return date;
+};
+
+const dayDiff = (fromDate, toDate) =>
+  Math.round((normalizeDay(toDate).getTime() - normalizeDay(fromDate).getTime()) / DAY_MS);
+
+const buildDaysInRange = (fromDate, toDate, maxDays = 35) => {
   const start = normalizeDay(fromDate);
   const end = normalizeDay(toDate);
   const days = [];
 
-  while (start <= end) {
+  while (start <= end && days.length < maxDays) {
     days.push(new Date(start));
     start.setDate(start.getDate() + 1);
   }
 
   return days;
+};
+
+const getTimelineLayout = (events, rangeStart, totalDays) => {
+  const segments = events
+    .map((event) => {
+      const startIndex = Math.max(0, dayDiff(rangeStart, event.checkInDate));
+      const endIndex = Math.min(totalDays, dayDiff(rangeStart, event.checkOutDate));
+      const span = endIndex - startIndex;
+      if (span <= 0) return null;
+      return {
+        event,
+        startIndex,
+        endIndex,
+        span,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => {
+      if (a.startIndex === b.startIndex) return a.endIndex - b.endIndex;
+      return a.startIndex - b.startIndex;
+    });
+
+  const laneEnds = [];
+  const laidOut = segments.map((segment) => {
+    let lane = laneEnds.findIndex((laneEnd) => segment.startIndex >= laneEnd);
+    if (lane === -1) {
+      lane = laneEnds.length;
+      laneEnds.push(segment.endIndex);
+    } else {
+      laneEnds[lane] = segment.endIndex;
+    }
+
+    return {
+      ...segment,
+      lane,
+    };
+  });
+
+  const rowHeight = Math.max(48, laneEnds.length * 34 + 10);
+  return { segments: laidOut, rowHeight };
 };
 
 function BookingModal({
@@ -106,7 +172,7 @@ function BookingModal({
             {mode === "create" ? "Create Booking" : "Adjust Booking"}
           </h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            ✕
+            x
           </button>
         </div>
 
@@ -179,9 +245,7 @@ function BookingModal({
                 type="date"
                 required
                 value={form.checkOutDate}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, checkOutDate: event.target.value }))
-                }
+                onChange={(event) => setForm((prev) => ({ ...prev, checkOutDate: event.target.value }))}
                 className={`w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 ${accent.accentRing}`}
               />
             </div>
@@ -247,6 +311,7 @@ function BookingModal({
 
 export default function BookingManagementPanel({ roleMode = "staff", showAuditLog = false }) {
   const accent = THEME[roleMode] || THEME.staff;
+  const canDragBookings = roleMode === "admin" || roleMode === "staff";
   const today = useMemo(() => new Date(), []);
   const defaultFrom = toDateInput(new Date(today.getFullYear(), today.getMonth(), 1));
   const defaultTo = toDateInput(new Date(today.getFullYear(), today.getMonth() + 1, 0));
@@ -258,6 +323,7 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
     fromDate: defaultFrom,
     toDate: defaultTo,
   });
+
   const [bookings, setBookings] = useState([]);
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [summary, setSummary] = useState({ total: 0, totalRevenue: 0 });
@@ -266,6 +332,8 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
   const [auditLogs, setAuditLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [draggingId, setDraggingId] = useState(null);
+  const [dropHint, setDropHint] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -363,7 +431,7 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
     setModalMode("create");
     setActiveBooking(null);
     setForm({
-      roomId: "",
+      roomId: filters.roomId || "",
       guestId: "",
       checkInDate: filters.fromDate || defaultFrom,
       checkOutDate: filters.toDate || defaultTo,
@@ -454,34 +522,56 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
     }
   };
 
+  const handleTimelineMove = async ({ bookingId, roomId, checkInDate, checkOutDate }) => {
+    try {
+      setSaving(true);
+      await api.patch(`/bookings/${bookingId}`, {
+        roomId,
+        checkInDate,
+        checkOutDate,
+      });
+      setSuccess("Booking moved on calendar");
+      await refreshAll();
+    } catch (requestError) {
+      console.error("[BOOKINGS] timeline move error:", requestError);
+      setError(requestError.response?.data?.message || "Unable to move booking in calendar");
+    } finally {
+      setSaving(false);
+      setDraggingId(null);
+      setDropHint(null);
+    }
+  };
+
   const calendarDays = useMemo(() => {
     if (!filters.fromDate || !filters.toDate) return [];
-    return buildDaysInRange(filters.fromDate, filters.toDate).slice(0, 42);
+    return buildDaysInRange(filters.fromDate, filters.toDate, 35);
   }, [filters.fromDate, filters.toDate]);
 
-  const eventsByDay = useMemo(() => {
-    const map = new Map();
-    calendarDays.forEach((day) => {
-      const start = normalizeDay(day);
-      const end = new Date(start);
-      end.setDate(end.getDate() + 1);
-      const events = calendarEvents.filter((event) => {
-        const eventStart = new Date(event.checkInDate);
-        const eventEnd = new Date(event.checkOutDate);
-        return eventStart < end && eventEnd > start && event.status !== "CANCELLED";
-      });
-      map.set(day.toISOString().slice(0, 10), events);
+  const rangeStart = calendarDays[0] || null;
+  const totalDays = calendarDays.length;
+
+  const timelineEvents = useMemo(() => {
+    return calendarEvents.filter((event) => {
+      const statusOk = filters.status ? event.status === filters.status : event.status !== "CANCELLED";
+      const roomOk = filters.roomId ? String(event.roomId) === String(filters.roomId) : true;
+      const guestOk = filters.guestId ? String(event.guestId) === String(filters.guestId) : true;
+      return statusOk && roomOk && guestOk;
     });
-    return map;
-  }, [calendarDays, calendarEvents]);
+  }, [calendarEvents, filters.guestId, filters.roomId, filters.status]);
 
   const totalRooms = rooms.length || 0;
   const occupiedToday = useMemo(() => {
-    const todayKey = new Date().toISOString().slice(0, 10);
-    const events = eventsByDay.get(todayKey) || [];
+    const todayKey = toDateInput(new Date());
+    const events = timelineEvents.filter((event) => {
+      const dayStart = normalizeDay(todayKey);
+      const dayEnd = addDays(dayStart, 1);
+      const eventStart = new Date(event.checkInDate);
+      const eventEnd = new Date(event.checkOutDate);
+      return eventStart < dayEnd && eventEnd > dayStart && event.status !== "CANCELLED";
+    });
     const uniqueRooms = new Set(events.map((event) => event.roomId));
     return uniqueRooms.size;
-  }, [eventsByDay]);
+  }, [timelineEvents]);
 
   const downloadCalendar = () => {
     const params = new URLSearchParams();
@@ -490,6 +580,37 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
     const query = params.toString();
     const url = `${getApiOrigin()}/api/bookings/calendar.ics${query ? `?${query}` : ""}`;
     window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleDropOnCell = async (event, targetRoomId, targetDay) => {
+    event.preventDefault();
+    const draggedBookingId = Number(event.dataTransfer.getData("bookingId") || draggingId);
+    setDropHint(null);
+
+    if (!draggedBookingId || !canDragBookings) return;
+
+    const booking = timelineEvents.find((item) => Number(item.id) === draggedBookingId);
+    if (!booking || !DRAGGABLE_STATUSES.has(booking.status)) return;
+
+    const nights = calculateNights(booking.checkInDate, booking.checkOutDate);
+    if (!nights) return;
+
+    const nextCheckIn = toDateInput(targetDay);
+    const nextCheckOut = toDateInput(addDays(targetDay, nights));
+
+    if (
+      Number(booking.roomId) === Number(targetRoomId) &&
+      toDateInput(booking.checkInDate) === nextCheckIn
+    ) {
+      return;
+    }
+
+    await handleTimelineMove({
+      bookingId: booking.id,
+      roomId: Number(targetRoomId),
+      checkInDate: nextCheckIn,
+      checkOutDate: nextCheckOut,
+    });
   };
 
   if (loading) {
@@ -516,7 +637,7 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg flex items-center justify-between">
           <span>{success}</span>
           <button onClick={() => setSuccess("")} className="text-emerald-700 hover:text-emerald-900">
-            ✕
+            x
           </button>
         </div>
       ) : null}
@@ -625,43 +746,157 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 p-5">
-        <h2 className="text-lg font-semibold text-premier-dark mb-4">Occupancy Calendar</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h2 className="text-lg font-semibold text-premier-dark">Interactive Occupancy Calendar</h2>
+          <p className="text-xs text-gray-500">
+            {canDragBookings
+              ? "Drag active booking blocks horizontally to shift dates or vertically to another room."
+              : "Calendar is read-only for your role."}
+          </p>
+        </div>
+
         {calendarDays.length === 0 ? (
           <p className="text-sm text-gray-500">Select a date range to view calendar occupancy.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-            {calendarDays.map((day) => {
-              const key = day.toISOString().slice(0, 10);
-              const events = eventsByDay.get(key) || [];
-              const occupiedRooms = new Set(events.map((event) => event.roomId)).size;
-              const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
-
-              return (
-                <div key={key} className="rounded-lg border border-gray-200 p-3">
-                  <div className="flex items-center justify-between">
-                    <p className="font-semibold text-premier-dark">{formatDate(day)}</p>
-                    <span className="text-xs text-gray-500">{occupancyRate}% full</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {occupiedRooms} occupied / {totalRooms || 0} rooms
-                  </p>
-                  <div className="mt-2 space-y-1 max-h-24 overflow-auto">
-                    {events.length > 0 ? (
-                      events.slice(0, 4).map((event) => (
-                        <div key={`${event.id}-${key}`} className="text-xs bg-gray-50 rounded px-2 py-1">
-                          Room {event.roomNumber} • {event.status}
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-emerald-600">No bookings</p>
-                    )}
-                    {events.length > 4 ? (
-                      <p className="text-xs text-gray-500">+{events.length - 4} more bookings</p>
-                    ) : null}
-                  </div>
+          <div className="overflow-x-auto border border-gray-200 rounded-lg">
+            <div
+              className="min-w-fit"
+              style={{ width: ROOM_COL_WIDTH + calendarDays.length * DAY_COL_WIDTH }}
+            >
+              <div
+                className="grid border-b border-gray-200 bg-gray-50"
+                style={{ gridTemplateColumns: `${ROOM_COL_WIDTH}px repeat(${calendarDays.length}, ${DAY_COL_WIDTH}px)` }}
+              >
+                <div className="sticky left-0 z-20 bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-600 uppercase border-r border-gray-200">
+                  Rooms
                 </div>
-              );
-            })}
+                {calendarDays.map((day) => (
+                  <div
+                    key={`h-${toDateInput(day)}`}
+                    className="px-1 py-2 text-center border-r border-gray-200 text-[11px] text-gray-600"
+                  >
+                    <p className="font-semibold text-gray-700">{formatDayLabel(day)}</p>
+                    <p>{new Date(day).toLocaleDateString("en-US", { weekday: "short" })}</p>
+                  </div>
+                ))}
+              </div>
+
+              {rooms.length === 0 ? (
+                <div className="px-4 py-6 text-sm text-gray-500">No rooms available for timeline.</div>
+              ) : (
+                rooms
+                  .filter((room) => (filters.roomId ? String(room.id) === String(filters.roomId) : true))
+                  .map((room) => {
+                    const roomEvents = timelineEvents.filter((event) => Number(event.roomId) === Number(room.id));
+                    const { segments, rowHeight } =
+                      rangeStart && totalDays > 0
+                        ? getTimelineLayout(roomEvents, rangeStart, totalDays)
+                        : { segments: [], rowHeight: 50 };
+
+                    return (
+                      <div key={room.id} className="relative border-b border-gray-200 last:border-b-0">
+                        <div
+                          className="grid"
+                          style={{
+                            gridTemplateColumns: `${ROOM_COL_WIDTH}px repeat(${calendarDays.length}, ${DAY_COL_WIDTH}px)`,
+                          }}
+                        >
+                          <div
+                            className="sticky left-0 z-10 bg-white border-r border-gray-200 px-3 py-2"
+                            style={{ height: rowHeight }}
+                          >
+                            <p className="text-sm font-semibold text-premier-dark">Room {room.roomNumber}</p>
+                            <p className="text-xs text-gray-500">{room.roomType}</p>
+                          </div>
+
+                          {calendarDays.map((day) => {
+                            const dayKey = toDateInput(day);
+                            const isDropTarget =
+                              dropHint &&
+                              Number(dropHint.roomId) === Number(room.id) &&
+                              dropHint.dayKey === dayKey;
+
+                            return (
+                              <div
+                                key={`${room.id}-${dayKey}`}
+                                style={{ height: rowHeight }}
+                                className={`border-r border-gray-100 ${isDropTarget ? "bg-emerald-50" : "bg-white"}`}
+                                onDragOver={(event) => {
+                                  if (!canDragBookings) return;
+                                  event.preventDefault();
+                                }}
+                                onDragEnter={() => {
+                                  if (!canDragBookings) return;
+                                  setDropHint({ roomId: room.id, dayKey });
+                                }}
+                                onDragLeave={() => {
+                                  if (!canDragBookings) return;
+                                  setDropHint((prev) =>
+                                    prev && prev.roomId === room.id && prev.dayKey === dayKey ? null : prev,
+                                  );
+                                }}
+                                onDrop={(event) => handleDropOnCell(event, room.id, day)}
+                              />
+                            );
+                          })}
+                        </div>
+
+                        <div
+                          className="absolute top-0 pointer-events-none"
+                          style={{
+                            left: ROOM_COL_WIDTH,
+                            width: calendarDays.length * DAY_COL_WIDTH,
+                            height: rowHeight,
+                          }}
+                        >
+                          {segments.map((segment) => {
+                            const canDrag = canDragBookings && DRAGGABLE_STATUSES.has(segment.event.status);
+                            return (
+                              <button
+                                key={`seg-${segment.event.id}-${segment.startIndex}-${segment.endIndex}`}
+                                type="button"
+                                draggable={canDrag}
+                                onDragStart={(event) => {
+                                  if (!canDrag) {
+                                    event.preventDefault();
+                                    return;
+                                  }
+                                  event.dataTransfer.setData("bookingId", String(segment.event.id));
+                                  setDraggingId(Number(segment.event.id));
+                                }}
+                                onDragEnd={() => {
+                                  setDraggingId(null);
+                                  setDropHint(null);
+                                }}
+                                onClick={() => {
+                                  const booking = bookings.find((item) => Number(item.id) === Number(segment.event.id));
+                                  if (booking) openEditModal(booking);
+                                }}
+                                className={`absolute pointer-events-auto text-left rounded px-2 text-[11px] text-white shadow-sm transition-opacity ${
+                                  STATUS_BAR[segment.event.status] || "bg-gray-600"
+                                } ${canDrag ? "cursor-grab" : "cursor-pointer"} ${
+                                  draggingId === Number(segment.event.id) ? "opacity-60" : "opacity-95"
+                                }`}
+                                style={{
+                                  left: segment.startIndex * DAY_COL_WIDTH + 2,
+                                  width: segment.span * DAY_COL_WIDTH - 4,
+                                  top: segment.lane * 34 + 6,
+                                  height: 26,
+                                }}
+                                title={`${segment.event.guestName || "Guest"} • ${segment.event.status} • ${formatDate(segment.event.checkInDate)} - ${formatDate(segment.event.checkOutDate)}`}
+                              >
+                                <span className="font-semibold truncate block">
+                                  {segment.event.guestName || "Guest"}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -771,9 +1006,7 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
                       {log.user?.firstName} {log.user?.lastName} ({log.user?.email})
                     </p>
                   </div>
-                  <p className="text-xs text-gray-500">
-                    {new Date(log.createdAt).toLocaleString("en-US")}
-                  </p>
+                  <p className="text-xs text-gray-500">{new Date(log.createdAt).toLocaleString("en-US")}</p>
                 </div>
               ))
             ) : (

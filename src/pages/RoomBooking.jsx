@@ -42,6 +42,8 @@ export default function RoomBooking() {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info");
   const [specialRequests, setSpecialRequests] = useState("");
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [roomAvailability, setRoomAvailability] = useState(null);
   const [stayData, setStayData] = useState({
     checkInDate: searchParams.get("checkInDate") || "",
     checkOutDate: searchParams.get("checkOutDate") || "",
@@ -79,6 +81,40 @@ export default function RoomBooking() {
     });
   }, [queryAdults, queryChildren, queryGuests, searchParams]);
 
+  useEffect(() => {
+    const fetchRoomAvailability = async () => {
+      if (!room?.id) return;
+      try {
+        setAvailabilityLoading(true);
+        const from = stayData.checkInDate || new Date().toISOString().slice(0, 10);
+        const to = stayData.checkOutDate
+          ? stayData.checkOutDate
+          : new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+        const response = await api.get(`/bookings/rooms/${room.id}/availability`, {
+          params: {
+            fromDate: from,
+            toDate: to,
+            ...(stayData.checkInDate && stayData.checkOutDate
+              ? {
+                  checkInDate: stayData.checkInDate,
+                  checkOutDate: stayData.checkOutDate,
+                }
+              : {}),
+          },
+        });
+        setRoomAvailability(response.data?.data || null);
+      } catch (error) {
+        console.error("[ROOM BOOKING] room availability error:", error);
+        setRoomAvailability(null);
+      } finally {
+        setAvailabilityLoading(false);
+      }
+    };
+
+    fetchRoomAvailability();
+  }, [room?.id, stayData.checkInDate, stayData.checkOutDate]);
+
   const nights = useMemo(
     () => calculateNights(stayData.checkInDate, stayData.checkOutDate),
     [stayData.checkInDate, stayData.checkOutDate],
@@ -88,6 +124,10 @@ export default function RoomBooking() {
     [nights, room?.pricePerNight],
   );
   const image = room?.image || room?.images?.[0];
+  const selectedRangeAvailable =
+    roomAvailability?.requestedRange?.isAvailable === undefined
+      ? true
+      : roomAvailability?.requestedRange?.isAvailable;
 
   const handleStayUpdate = ({ checkInDate, checkOutDate, adults, children, guests }) => {
     const params = new URLSearchParams({
@@ -117,6 +157,12 @@ export default function RoomBooking() {
 
     if (!stayData.checkInDate || !stayData.checkOutDate || nights <= 0) {
       setMessage("Select valid check-in and check-out dates before proceeding.");
+      setMessageType("error");
+      return;
+    }
+
+    if (!selectedRangeAvailable) {
+      setMessage("This room is no longer available for the selected dates. Please choose different dates.");
       setMessageType("error");
       return;
     }
@@ -207,6 +253,41 @@ export default function RoomBooking() {
           buttonLabel="Update Stay Details"
           onSearch={handleStayUpdate}
         />
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-100 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="text-lg font-semibold text-premier-dark">Room Availability</h3>
+          {availabilityLoading ? (
+            <span className="text-xs text-gray-500">Checking latest availability...</span>
+          ) : (
+            <span
+              className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                selectedRangeAvailable
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-rose-100 text-rose-700"
+              }`}
+            >
+              {selectedRangeAvailable ? "Selected dates available" : "Selected dates unavailable"}
+            </span>
+          )}
+        </div>
+
+        <div className="mt-3 text-sm text-gray-600">
+          <p>
+            Rule: minimum {roomAvailability?.restrictions?.minNights || 1} night, maximum{" "}
+            {roomAvailability?.restrictions?.maxNights || 30} nights, and bookings up to{" "}
+            {roomAvailability?.restrictions?.maxAdvanceDays || 365} days in advance.
+          </p>
+          {Array.isArray(roomAvailability?.blockingBookings) &&
+          roomAvailability.blockingBookings.length > 0 ? (
+            <p className="mt-1">
+              Existing blocked periods in view: {roomAvailability.blockingBookings.length}
+            </p>
+          ) : (
+            <p className="mt-1 text-emerald-700">No blocked periods in the selected window.</p>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6">
