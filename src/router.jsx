@@ -53,7 +53,7 @@ const PageShell = ({ children }) => (
 );
 
 function AppRouter() {
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
 
   return (
     <BrowserRouter basename="/6ix-premier-hotel-manager-fe">
@@ -118,7 +118,16 @@ function AppRouter() {
                         <Route
                           path="/login"
                           element={
-                            currentUser ? (
+                            loading ? (
+                              <div className="min-h-screen flex items-center justify-center bg-premier-light">
+                                <div className="flex flex-col items-center gap-4">
+                                  <div className="w-12 h-12 border-4 border-premier-copper border-t-transparent rounded-full animate-spin" />
+                                  <p className="text-premier-dark/70">
+                                    Loading...
+                                  </p>
+                                </div>
+                              </div>
+                            ) : currentUser ? (
                               <Navigate to="/dashboard" />
                             ) : (
                               <PageShell>
@@ -130,7 +139,16 @@ function AppRouter() {
                         <Route
                           path="/register"
                           element={
-                            currentUser ? (
+                            loading ? (
+                              <div className="min-h-screen flex items-center justify-center bg-premier-light">
+                                <div className="flex flex-col items-center gap-4">
+                                  <div className="w-12 h-12 border-4 border-premier-copper border-t-transparent rounded-full animate-spin" />
+                                  <p className="text-premier-dark/70">
+                                    Loading...
+                                  </p>
+                                </div>
+                              </div>
+                            ) : currentUser ? (
                               <Navigate to="/dashboard" />
                             ) : (
                               <PageShell>

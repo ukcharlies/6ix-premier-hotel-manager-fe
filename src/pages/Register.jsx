@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../services/api";
-import { useNavigate, Link } from "react-router-dom";
-import { FaEye, FaEyeSlash, FaHotel, FaCheckCircle } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { FaEye, FaEyeSlash, FaHotel, FaCheckCircle, FaEnvelope } from "react-icons/fa";
 import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
 
 export default function Register() {
@@ -17,17 +17,33 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
-  const navigate = useNavigate();
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+
+  // Auto-scroll to first error when validation fails
+  useEffect(() => {
+    if (Object.keys(errors).length > 0 && !registrationSuccess) {
+      const firstErrorField = Object.keys(errors)[0];
+      const errorElement = document.querySelector(`[name="${firstErrorField}"]`) || 
+                          document.querySelector('.bg-red-50.border-red-400');
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [errors, registrationSuccess]);
 
   const validateForm = () => {
     const newErrors = {};
     
-    if (!form.firstName) newErrors.firstName = "First name is required";
-    if (!form.lastName) newErrors.lastName = "Last name is required";
+    if (!form.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!form.lastName.trim()) newErrors.lastName = "Last name is required";
     if (!form.email) newErrors.email = "Email is required";
     if (!form.password) newErrors.password = "Password is required";
     if (form.password !== form.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
+    }
+    if (!agreedToTerms) {
+      newErrors.terms = "You must agree to the Terms & Conditions to continue";
     }
     
     setErrors(newErrors);
@@ -50,17 +66,31 @@ export default function Register() {
     try {
       const { confirmPassword, ...registerData } = form;
       await api.post("/auth/register", registerData);
-      navigate("/login", { 
-        state: { message: "Registration successful! Please check your email to verify your account." }
-      });
+      setRegistrationSuccess(true);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "Registration failed";
-      setErrors(prev => ({
-        ...prev,
-        submit: errorMessage,
-        ...(errorMessage.includes("email") && { email: errorMessage }),
-        ...(errorMessage.includes("password") && { password: errorMessage })
-      }));
+      const data = err.response?.data;
+
+      if (data?.errors) {
+        // Backend field-level validation errors (from validationMiddleware)
+        // Each field error can be a string or an array of strings
+        const fieldErrors = {};
+        Object.entries(data.errors).forEach(([field, value]) => {
+          fieldErrors[field] = Array.isArray(value) ? value.join(" • ") : value;
+        });
+        setErrors(prev => ({ ...prev, ...fieldErrors, submit: null }));
+      } else {
+        // Generic error (e.g. "User already exists")
+        const message = data?.message || "Registration failed. Please try again.";
+        const friendlyMessages = {
+          "User already exists": "An account with this email already exists. Try logging in instead.",
+          "Error registering user": "Something went wrong on our end. Please try again later.",
+        };
+        setErrors(prev => ({
+          ...prev,
+          submit: friendlyMessages[message] || message,
+          ...(message.toLowerCase().includes("email") && { email: friendlyMessages[message] || message }),
+        }));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -76,10 +106,10 @@ export default function Register() {
       </div>
 
       {/* Content container */}
-      <div className="w-full max-w-md lg:max-w-4xl relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+      <div className="w-full max-w-md md:max-w-5xl relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {/* Left side - Welcome message (hidden on mobile) */}
-          <div className="hidden lg:flex flex-col justify-center text-white animate-fade-in">
+          <div className="hidden md:flex flex-col justify-center text-white auth-fade-in">
             <div className="flex items-center space-x-3 mb-6">
               <div className="p-3 bg-premier-copper/30 backdrop-blur-md rounded-lg">
                 <FaHotel className="text-3xl text-premier-copper" />
@@ -106,16 +136,51 @@ export default function Register() {
             </div>
           </div>
 
-          {/* Right side - Register form */}
-          <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-6 sm:p-8 animate-slide-up max-h-[90vh] overflow-y-auto">
+          {/* Right side - Register form / Success message */}
+          <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-6 sm:p-8 auth-slide-up max-h-[90vh] overflow-y-auto">
+            {registrationSuccess ? (
+              /* ── Success screen ── */
+              <div className="text-center py-8 auth-fade-in">
+                <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 auth-pulse-slow">
+                  <FaEnvelope className="text-3xl text-green-600" />
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Check Your Email</h3>
+                <p className="text-dark-400 mb-2">
+                  We've sent a verification link to
+                </p>
+                <p className="text-premier-copper font-semibold text-lg mb-6">{form.email}</p>
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6 text-left">
+                  <p className="text-sm text-blue-800 font-bold mb-2">
+                    📧 Next steps:
+                  </p>
+                  <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
+                    <li><strong>Open your email inbox</strong></li>
+                    <li>Click the <strong>"Verify Email"</strong> button in the email</li>
+                    <li>Once verified, you can log in to your account</li>
+                  </ol>
+                </div>
+                <p className="text-sm text-dark-400 mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  💡 <strong>Didn't receive the email?</strong> Check your spam folder or try registering again.
+                </p>
+                <Link
+                  to="/login"
+                  className="inline-block w-full sm:w-auto bg-gradient-to-r from-premier-copper to-primary-600 text-white font-semibold py-3 px-8 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                >
+                  Go to Login
+                </Link>
+              </div>
+            ) : (
+              /* ── Registration form ── */
+              <>
             <div className="mb-6">
               <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Create Account</h3>
               <p className="text-dark-400">Join us for a premium experience</p>
             </div>
 
             {errors.submit && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm animate-shake">
-                {errors.submit}
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm auth-shake flex items-start gap-2">
+                <span className="mt-0.5 shrink-0">⚠️</span>
+                <span>{errors.submit}</span>
               </div>
             )}
 
@@ -139,7 +204,7 @@ export default function Register() {
                     />
                   </div>
                   {errors.firstName && (
-                    <p className="text-red-600 text-sm mt-1 animate-fade-in">{errors.firstName}</p>
+                    <p className="text-red-600 text-sm mt-1 auth-fade-in">{errors.firstName}</p>
                   )}
                 </div>
 
@@ -160,7 +225,7 @@ export default function Register() {
                     />
                   </div>
                   {errors.lastName && (
-                    <p className="text-red-600 text-sm mt-1 animate-fade-in">{errors.lastName}</p>
+                    <p className="text-red-600 text-sm mt-1 auth-fade-in">{errors.lastName}</p>
                   )}
                 </div>
               </div>
@@ -183,7 +248,7 @@ export default function Register() {
                   />
                 </div>
                 {errors.email && (
-                  <p className="text-red-600 text-sm mt-1 animate-fade-in">{errors.email}</p>
+                  <p className="text-red-600 text-sm mt-1 auth-fade-in">{errors.email}</p>
                 )}
               </div>
 
@@ -212,7 +277,20 @@ export default function Register() {
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-red-600 text-sm mt-1 animate-fade-in">{errors.password}</p>
+                  <div className="mt-1 auth-fade-in">
+                    {errors.password.includes(" • ") ? (
+                      <ul className="text-red-600 text-sm space-y-0.5 list-none">
+                        {errors.password.split(" • ").map((msg, i) => (
+                          <li key={i} className="flex items-start gap-1">
+                            <span className="mt-0.5 text-red-500">✕</span>
+                            <span>{msg}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-red-600 text-sm">{errors.password}</p>
+                    )}
+                  </div>
                 )}
                 <PasswordStrengthMeter password={form.password} />
               </div>
@@ -242,15 +320,31 @@ export default function Register() {
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <p className="text-red-600 text-sm mt-1 animate-fade-in">{errors.confirmPassword}</p>
+                  <p className="text-red-600 text-sm mt-1 auth-fade-in">{errors.confirmPassword}</p>
                 )}
               </div>
 
               {/* Terms checkbox */}
-              <label className="flex items-center space-x-2 text-sm text-premier-dark cursor-pointer hover:text-premier-copper transition-colors">
-                <input type="checkbox" required className="w-4 h-4 rounded border-premier-gray text-premier-copper focus:ring-premier-copper" />
-                <span>I agree to the Terms & Conditions</span>
-              </label>
+              <div className={`p-3 rounded-lg transition-all duration-300 ${errors.terms ? 'bg-red-50 border-2 border-red-400 auth-shake' : ''}`}>
+                <label className="flex items-center space-x-2 text-sm text-premier-dark cursor-pointer hover:text-premier-copper transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => {
+                      setAgreedToTerms(e.target.checked);
+                      if (e.target.checked) setErrors(prev => ({ ...prev, terms: null }));
+                    }}
+                    className="w-4 h-4 rounded border-premier-gray text-premier-copper focus:ring-premier-copper"
+                  />
+                  <span>I agree to the Terms & Conditions</span>
+                </label>
+                {errors.terms && (
+                  <p className="text-red-600 text-sm mt-2 font-semibold auth-fade-in flex items-center gap-1">
+                    <span className="text-lg">⚠</span>
+                    {errors.terms}
+                  </p>
+                )}
+              </div>
 
               {/* Submit button */}
               <button
@@ -278,28 +372,35 @@ export default function Register() {
                 </Link>
               </p>
             </div>
+              </>
+            )}
           </div>
         </div>
       </div>
 
       {/* Add animations to CSS */}
       <style>{`
-        @keyframes fade-in {
+        @keyframes auth-fade-in {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        @keyframes slide-up {
+        @keyframes auth-slide-up {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes shake {
+        @keyframes auth-shake {
           0%, 100% { transform: translateX(0); }
           25% { transform: translateX(-5px); }
           75% { transform: translateX(5px); }
         }
-        .animate-fade-in { animation: fade-in 0.6s ease-out; }
-        .animate-slide-up { animation: slide-up 0.6s ease-out; }
-        .animate-shake { animation: shake 0.4s ease-in-out; }
+        @keyframes auth-pulse-slow {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        .auth-fade-in { animation: auth-fade-in 0.6s ease-out forwards; }
+        .auth-slide-up { animation: auth-slide-up 0.6s ease-out forwards; }
+        .auth-shake { animation: auth-shake 0.4s ease-in-out; }
+        .auth-pulse-slow { animation: auth-pulse-slow 2s ease-in-out infinite; }
         .delay-2000 { animation-delay: 2s; }
         .delay-4000 { animation-delay: 4s; }
       `}</style>

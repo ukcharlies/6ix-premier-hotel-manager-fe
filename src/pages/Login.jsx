@@ -66,7 +66,13 @@ export default function Login() {
         navigate(redirectPath, { replace: true });
       }
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "Login failed";
+      const backendMessage = err.response?.data?.message || "Login failed";
+      const friendlyMessages = {
+        "Invalid email or password": "Invalid email or password.",
+        "Account not verified. Please verify your email before logging in.":
+          "Your account is not verified yet. Check your email and click the verification link.",
+      };
+      const errorMessage = friendlyMessages[backendMessage] || backendMessage;
       setErrors({
         submit: errorMessage,
         ...(errorMessage.includes("password") && { password: errorMessage }),
@@ -87,10 +93,10 @@ export default function Login() {
       </div>
 
       {/* Content container */}
-      <div className="w-full max-w-md lg:max-w-4xl relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+        <div className="w-full max-w-md md:max-w-5xl relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {/* Left side - Welcome message (hidden on mobile) */}
-          <div className="hidden lg:flex flex-col justify-center text-white animate-fade-in">
+          <div className="hidden md:flex flex-col justify-center text-white auth-fade-in">
             <div className="flex items-center space-x-3 mb-6">
               <div className="p-3 bg-premier-copper/30 backdrop-blur-md rounded-lg">
                 <FaHotel className="text-3xl text-premier-copper" />
@@ -118,7 +124,7 @@ export default function Login() {
           </div>
 
           {/* Right side - Login form */}
-          <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-6 sm:p-8 animate-slide-up">
+          <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-6 sm:p-8 auth-slide-up">
             <div className="mb-6">
               <h3 className="text-2xl sm:text-3xl font-bold text-premier-dark mb-2">Sign In</h3>
               <p className="text-dark-400">Enter your credentials to access your account</p>
@@ -138,7 +144,7 @@ export default function Login() {
             )}
 
             {errors.submit && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm animate-shake">
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm auth-shake">
                 {errors.submit}
               </div>
             )}
@@ -162,7 +168,7 @@ export default function Login() {
                   />
                 </div>
                 {errors.email && (
-                  <p className="text-red-600 text-sm mt-2 animate-fade-in">{errors.email}</p>
+                  <p className="text-red-600 text-sm mt-2 auth-fade-in">{errors.email}</p>
                 )}
               </div>
 
@@ -191,7 +197,7 @@ export default function Login() {
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-red-600 text-sm mt-2 animate-fade-in">{errors.password}</p>
+                  <p className="text-red-600 text-sm mt-2 auth-fade-in">{errors.password}</p>
                 )}
               </div>
 
@@ -238,22 +244,22 @@ export default function Login() {
 
       {/* Add animations to CSS */}
       <style>{`
-        @keyframes fade-in {
+        @keyframes auth-fade-in {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        @keyframes slide-up {
+        @keyframes auth-slide-up {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes shake {
+        @keyframes auth-shake {
           0%, 100% { transform: translateX(0); }
           25% { transform: translateX(-5px); }
           75% { transform: translateX(5px); }
         }
-        .animate-fade-in { animation: fade-in 0.6s ease-out; }
-        .animate-slide-up { animation: slide-up 0.6s ease-out; }
-        .animate-shake { animation: shake 0.4s ease-in-out; }
+        .auth-fade-in { animation: auth-fade-in 0.6s ease-out forwards; }
+        .auth-slide-up { animation: auth-slide-up 0.6s ease-out forwards; }
+        .auth-shake { animation: auth-shake 0.4s ease-in-out; }
         .delay-2000 { animation-delay: 2s; }
         .delay-4000 { animation-delay: 4s; }
       `}</style>
