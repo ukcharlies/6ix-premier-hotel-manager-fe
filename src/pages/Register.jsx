@@ -101,7 +101,7 @@ export default function Register() {
               </div>
               <div className="flex items-center space-x-3 text-white/90">
                 <FaCheckCircle className="text-premier-copper" />
-                <span>Instant account activation</span>
+                <span>Email-based account activation</span>
               </div>
             </div>
           </div>

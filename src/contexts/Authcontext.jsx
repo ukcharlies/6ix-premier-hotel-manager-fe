@@ -48,8 +48,7 @@ export function AuthProvider({ children }) {
   const register = async (userData) => {
     const res = await api.post("/auth/register", userData);
     if (res?.data?.success) {
-      setCurrentUser(res.data.user);
-      console.log(`[AUTH] User registered: ${userData.email}, Role: ${res.data.user.role}`);
+      console.log(`[AUTH] User registered: ${userData.email}. Awaiting email verification.`);
     }
     return res;
   };
