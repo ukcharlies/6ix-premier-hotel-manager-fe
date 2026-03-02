@@ -45,3 +45,30 @@ export function buildUploadImageUrl(upload) {
 
   return "";
 }
+
+/**
+ * Get the base path for the application (e.g., /6ix-premier-hotel-manager-fe/)
+ * This is used for static assets in GitHub Pages deployments
+ */
+export function getBasePath() {
+  return import.meta.env.BASE_URL || '/';
+}
+
+/**
+ * Build a URL for static assets (images in /public folder)
+ * Handles GitHub Pages base path automatically
+ * @param {string} path - Path to the asset (e.g., '/king.jpg')
+ * @returns {string} Full path with base URL
+ */
+export function getStaticAssetUrl(path) {
+  if (!path) return '';
+  const basePath = getBasePath();
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${basePath}${cleanPath}`;
+}
+
+/**
+ * Get the default fallback room image URL
+ * Used for error handling when room images fail to load
+ */
+export const FALLBACK_ROOM_IMAGE = getStaticAssetUrl('/room.jpg');

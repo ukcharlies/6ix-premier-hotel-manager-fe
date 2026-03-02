@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import ScrollFloat from "../components/ScrollFloat";
+import { getStaticAssetUrl } from "../utils/publicUrl";
 
 // Hero background image (you can change this to a relevant venue/ballroom image)
-const heroImage = "/bilderboken-rlwE8f8anOc-unsplash.jpg";
+const heroImage = getStaticAssetUrl("/bilderboken-rlwE8f8anOc-unsplash.jpg");
 
 // SVG Icons
 const CalendarCheckIcon = () => (
@@ -134,7 +135,7 @@ const venueData = [
       "Integrated sound system",
       "Private entrance",
     ],
-    image: "/king.jpg",
+    image: getStaticAssetUrl("/king.jpg"),
     icon: <BuildingOfficeIcon />,
   },
   {
@@ -150,7 +151,7 @@ const venueData = [
       "High-speed Wi-Fi",
       "Dedicated support",
     ],
-    image: "/room.jpg",
+    image: getStaticAssetUrl("/room.jpg"),
     icon: <TableCellsIcon />,
   },
   {
@@ -166,7 +167,7 @@ const venueData = [
       "Custom décor options",
       "Dedicated staff",
     ],
-    image: "/room2.jpg",
+    image: getStaticAssetUrl("/room2.jpg"),
     icon: <HeartIcon />,
   },
 ];

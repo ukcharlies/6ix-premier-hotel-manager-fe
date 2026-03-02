@@ -6,40 +6,42 @@ import TextPressure from "../components/TextPressure";
 import AmenitiesSection from "../components/AmenitiesSection";
 import ReviewsSection from "../components/ReviewsSection";
 import StaySearchPanel from "../components/StaySearchPanel";
-const heroImage = "/bilderboken-rlwE8f8anOc-unsplash.jpg";
+import { getStaticAssetUrl } from "../utils/publicUrl";
+
+const heroImage = getStaticAssetUrl("/bilderboken-rlwE8f8anOc-unsplash.jpg");
 
 export default function Home() {
   const navigate = useNavigate();
   const searchSectionRef = useRef(null);
   const galleryItems = [
-    { image: "/king.jpg", text: "Signature King Suite" },
-    { image: "/room.jpg", text: "Premier Double" },
-    { image: "/room2.jpg", text: "Skyline Deluxe" },
-    { image: "/Standard.jpg", text: "Standard Retreat" },
+    { image: getStaticAssetUrl("/king.jpg"), text: "Signature King Suite" },
+    { image: getStaticAssetUrl("/room.jpg"), text: "Premier Double" },
+    { image: getStaticAssetUrl("/room2.jpg"), text: "Skyline Deluxe" },
+    { image: getStaticAssetUrl("/Standard.jpg"), text: "Standard Retreat" },
   ];
 
   const roomHighlights = [
     {
       title: "Signature King Suite",
-      image: "/king.jpg",
+      image: getStaticAssetUrl("/king.jpg"),
       copy: "Spacious living, bespoke bedding, and lounge access for business or leisure.",
       tags: ["City views", "Executive lounge", "Walk-in shower"],
     },
     {
       title: "Premier Double",
-      image: "/room.jpg",
+      image: getStaticAssetUrl("/room.jpg"),
       copy: "Thoughtfully designed for small groups or families with layered comfort touches.",
       tags: ["Two plush doubles", "Sound-damped walls", "24/7 concierge"],
     },
     {
       title: "Skyline Deluxe",
-      image: "/room2.jpg",
+      image: getStaticAssetUrl("/room2.jpg"),
       copy: "Floor-to-ceiling outlooks, curated art, and a calm palette to reset your day.",
       tags: ["Panoramic windows", "Turn-down service", "In-room dining"],
     },
     {
       title: "Standard Retreat",
-      image: "/Standard.jpg",
+      image: getStaticAssetUrl("/Standard.jpg"),
       copy: "Minimal, refined essentials with the same signature Premier service standards.",
       tags: ["Crisp linens", "Rainfall shower", "Fast Wi-Fi"],
     },
