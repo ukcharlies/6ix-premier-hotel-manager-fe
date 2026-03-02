@@ -4,7 +4,7 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
-  base: '/hotel-manager/',
+  base: "/6ix-premier-hotel-manager-fe/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

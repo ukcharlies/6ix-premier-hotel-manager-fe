@@ -56,7 +56,7 @@ function AppRouter() {
   const { currentUser } = useAuth();
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/6ix-premier-hotel-manager-fe">
       <ErrorBoundary>
         <SessionProvider>
           <Routes>
