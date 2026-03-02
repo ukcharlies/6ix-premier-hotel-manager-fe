@@ -1,16 +1,33 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import api from "../services/api";
 import { useSearchParams, Link } from "react-router-dom";
-import { FaCheckCircle, FaTimesCircle, FaEnvelope } from "react-icons/fa";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+
+const getVerifyRequestStore = () => {
+  if (!window.__verifyEmailRequests) {
+    window.__verifyEmailRequests = {};
+  }
+  return window.__verifyEmailRequests;
+};
+
+const verifyTokenOnce = async (token) => {
+  const store = getVerifyRequestStore();
+  if (!store[token]) {
+    store[token] = api.post("/auth/verify-email", { token }).catch((error) => {
+      delete store[token];
+      throw error;
+    });
+  }
+  return store[token];
+};
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
+  const token = useMemo(() => searchParams.get("token"), [searchParams]);
   const [status, setStatus] = useState("loading"); // loading | success | error
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    const token = searchParams.get("token");
-
     if (!token) {
       setStatus("error");
       setErrorMessage("No verification token found. Please check your email link and try again.");
@@ -19,7 +36,7 @@ export default function VerifyEmail() {
 
     const verifyEmail = async () => {
       try {
-        await api.post("/auth/verify-email", { token });
+        await verifyTokenOnce(token);
         setStatus("success");
       } catch (err) {
         setStatus("error");
@@ -33,7 +50,7 @@ export default function VerifyEmail() {
     };
 
     verifyEmail();
-  }, [searchParams]);
+  }, [token]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-premier-dark via-dark-700 to-premier-copper flex items-center justify-center px-4 py-8">

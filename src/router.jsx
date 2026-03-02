@@ -52,11 +52,24 @@ const PageShell = ({ children }) => (
   <div className="container mx-auto px-4 py-8">{children}</div>
 );
 
+const normalizeBase = (value) => {
+  if (!value || value === "/") return "/";
+  return `/${value.replace(/^\/+|\/+$/g, "")}`;
+};
+
 function AppRouter() {
   const { currentUser, loading } = useAuth();
+  const configuredBase = normalizeBase(import.meta.env.BASE_URL || "/");
+  const runtimeBase =
+    configuredBase !== "/" &&
+    window.location.pathname.startsWith(`${configuredBase}/`)
+      ? configuredBase
+      : configuredBase !== "/" && window.location.pathname === configuredBase
+      ? configuredBase
+      : "/";
 
   return (
-    <BrowserRouter basename="/6ix-premier-hotel-manager-fe">
+    <BrowserRouter basename={runtimeBase}>
       <ErrorBoundary>
         <SessionProvider>
           <Routes>
