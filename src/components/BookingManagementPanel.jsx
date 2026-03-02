@@ -77,6 +77,34 @@ const calculateNights = (checkInDate, checkOutDate) => {
   return Math.max(1, Math.ceil(diff / DAY_MS));
 };
 
+const roundMoney = (value) => Number(Number(value || 0).toFixed(2));
+
+const estimatePricing = ({ checkInDate, checkOutDate, pricePerNight, bookingPolicy }) => {
+  const nights = calculateNights(checkInDate, checkOutDate);
+  const baseAmount = roundMoney(Number(pricePerNight || 0) * nights);
+  const lateFeeCfg = bookingPolicy?.policy?.lateFee;
+  let lateBookingFee = 0;
+
+  if (lateFeeCfg?.active && checkInDate) {
+    const checkIn = new Date(checkInDate).getTime();
+    const now = Date.now();
+    const windowStart = checkIn - Number(lateFeeCfg.windowHours || 24) * 60 * 60 * 1000;
+    if (now >= windowStart && now < checkIn) {
+      lateBookingFee =
+        lateFeeCfg.type === "percent"
+          ? roundMoney((baseAmount * Number(lateFeeCfg.value || 0)) / 100)
+          : roundMoney(Number(lateFeeCfg.value || 0));
+    }
+  }
+
+  return {
+    nights,
+    baseAmount,
+    lateBookingFee,
+    totalAmount: roundMoney(baseAmount + lateBookingFee),
+  };
+};
+
 const normalizeDay = (value) => {
   const date = new Date(value);
   date.setHours(0, 0, 0, 0);
@@ -157,12 +185,17 @@ function BookingModal({
   onSubmit,
   saving,
   accent,
+  bookingPolicy,
 }) {
   if (!open) return null;
 
   const selectedRoom = rooms.find((room) => String(room.id) === String(form.roomId));
-  const nights = calculateNights(form.checkInDate, form.checkOutDate);
-  const estimatedTotal = nights > 0 ? nights * Number(selectedRoom?.pricePerNight || 0) : 0;
+  const pricing = estimatePricing({
+    checkInDate: form.checkInDate,
+    checkOutDate: form.checkOutDate,
+    pricePerNight: selectedRoom?.pricePerNight,
+    bookingPolicy,
+  });
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 p-4 overflow-y-auto">
@@ -281,9 +314,14 @@ function BookingModal({
 
           <div className={`rounded-lg p-3 ${accent.accentSoftBg}`}>
             <p className="text-sm text-gray-700">
-              {nights > 0 ? `${nights} night${nights > 1 ? "s" : ""}` : "Select valid dates"} •
+              {pricing.nights > 0
+                ? `${pricing.nights} night${pricing.nights > 1 ? "s" : ""}`
+                : "Select valid dates"} •
               Estimated total:{" "}
-              <span className={`font-semibold ${accent.accentText}`}>{formatMoney(estimatedTotal)}</span>
+              <span className={`font-semibold ${accent.accentText}`}>{formatMoney(pricing.totalAmount)}</span>
+            </p>
+            <p className="text-xs mt-1 text-gray-600">
+              Base {formatMoney(pricing.baseAmount)} + late fee {formatMoney(pricing.lateBookingFee)}
             </p>
           </div>
 
@@ -329,6 +367,7 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
   const [summary, setSummary] = useState({ total: 0, totalRevenue: 0 });
   const [rooms, setRooms] = useState([]);
   const [guests, setGuests] = useState([]);
+  const [bookingPolicy, setBookingPolicy] = useState(null);
   const [auditLogs, setAuditLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -353,7 +392,7 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
 
   const loadReferences = useCallback(async () => {
     try {
-      const calls = [api.get("/rooms")];
+      const calls = [api.get("/rooms"), api.get("/bookings/policy")];
       if (showGuestSelector) {
         calls.push(api.get("/bookings/guests", { params: { limit: 100 } }));
       }
@@ -367,8 +406,11 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
       const roomsData = Array.isArray(roomsRes.data?.rooms) ? roomsRes.data.rooms : [];
       setRooms(roomsData);
 
+      const policyRes = responses[1];
+      setBookingPolicy(policyRes.data?.data || null);
+
       if (showGuestSelector) {
-        const guestsRes = responses[1];
+        const guestsRes = responses[2];
         setGuests(Array.isArray(guestsRes.data?.guests) ? guestsRes.data.guests : []);
       }
 
@@ -660,6 +702,17 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 p-5 space-y-4">
+        {bookingPolicy ? (
+          <div className="text-xs rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-600">
+            Policy: check-in {bookingPolicy.policy?.checkInHour ?? 14}:00, checkout{" "}
+            {bookingPolicy.policy?.checkoutHour ?? 12}:00, min {bookingPolicy.restrictions?.minNights ?? 1} night,
+            max {bookingPolicy.restrictions?.maxNights ?? 30} nights. Late fee{" "}
+            {bookingPolicy.policy?.lateFee?.active
+              ? `${bookingPolicy.policy?.lateFee?.type === "percent" ? `${bookingPolicy.policy?.lateFee?.value}%` : formatMoney(bookingPolicy.policy?.lateFee?.value)} within ${bookingPolicy.policy?.lateFee?.windowHours}h`
+              : "inactive"}
+            .
+          </div>
+        ) : null}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
           <div>
             <label className="text-xs font-semibold text-gray-600 uppercase block mb-1">Status</label>
@@ -1028,6 +1081,7 @@ export default function BookingManagementPanel({ roleMode = "staff", showAuditLo
         onSubmit={handleSubmitBooking}
         saving={saving}
         accent={accent}
+        bookingPolicy={bookingPolicy}
       />
     </div>
   );

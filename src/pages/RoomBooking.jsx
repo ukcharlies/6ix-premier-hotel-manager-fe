@@ -124,6 +124,7 @@ export default function RoomBooking() {
     [nights, room?.pricePerNight],
   );
   const image = room?.image || room?.images?.[0];
+  const quotedPricing = roomAvailability?.requestedRange?.pricing || null;
   const selectedRangeAvailable =
     roomAvailability?.requestedRange?.isAvailable === undefined
       ? true
@@ -279,6 +280,26 @@ export default function RoomBooking() {
             {roomAvailability?.restrictions?.maxNights || 30} nights, and bookings up to{" "}
             {roomAvailability?.restrictions?.maxAdvanceDays || 365} days in advance.
           </p>
+          <p className="mt-1">
+            Check-in starts at {roomAvailability?.policy?.checkInHour ?? 14}:00 and checkout is by{" "}
+            {roomAvailability?.policy?.checkoutHour ?? 12}:00.
+          </p>
+          {roomAvailability?.policy?.lateFee?.enabled ? (
+            <p className="mt-1">
+              Late booking fee:{" "}
+              {roomAvailability?.policy?.lateFee?.active
+                ? `${roomAvailability.policy.lateFee.type === "percent" ? `${roomAvailability.policy.lateFee.value}%` : `₦${Number(roomAvailability.policy.lateFee.value || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} within ${roomAvailability.policy.lateFee.windowHours}h to check-in`
+                : "configured but currently inactive (likely festive-only switch is off)."}
+            </p>
+          ) : null}
+          {roomAvailability?.requestedRange?.pricing ? (
+            <p className="mt-1 font-medium text-premier-dark">
+              Pricing for selected stay: Base{" "}
+              {formatMoney(roomAvailability.requestedRange.pricing.baseAmount)} + Late fee{" "}
+              {formatMoney(roomAvailability.requestedRange.pricing.lateBookingFee)} ={" "}
+              {formatMoney(roomAvailability.requestedRange.pricing.totalAmount)}
+            </p>
+          ) : null}
           {Array.isArray(roomAvailability?.blockingBookings) &&
           roomAvailability.blockingBookings.length > 0 ? (
             <p className="mt-1">
@@ -374,7 +395,15 @@ export default function RoomBooking() {
 
           <div className="rounded-lg bg-premier-light/50 border border-premier-copper/20 p-4">
             <p className="text-sm text-gray-600">Total amount</p>
-            <p className="text-3xl font-bold text-premier-copper">{formatMoney(total)}</p>
+            <p className="text-3xl font-bold text-premier-copper">
+              {formatMoney(quotedPricing?.totalAmount ?? total)}
+            </p>
+            {quotedPricing ? (
+              <p className="text-xs text-gray-600 mt-1">
+                Base {formatMoney(quotedPricing.baseAmount)} + Late fee{" "}
+                {formatMoney(quotedPricing.lateBookingFee)}
+              </p>
+            ) : null}
           </div>
 
           <button
