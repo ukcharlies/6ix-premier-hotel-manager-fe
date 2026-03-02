@@ -26,6 +26,21 @@ export default function VerifyEmail() {
   const token = useMemo(() => searchParams.get("token"), [searchParams]);
   const [status, setStatus] = useState("loading"); // loading | success | error
   const [errorMessage, setErrorMessage] = useState("");
+  const [progress, setProgress] = useState(8);
+
+  useEffect(() => {
+    if (status !== "loading") return undefined;
+
+    const timer = window.setInterval(() => {
+      setProgress((current) => {
+        if (current >= 92) return current;
+        const step = Math.max(1, Math.floor((100 - current) / 12));
+        return Math.min(92, current + step);
+      });
+    }, 120);
+
+    return () => window.clearInterval(timer);
+  }, [status]);
 
   useEffect(() => {
     if (!token) {
@@ -37,34 +52,77 @@ export default function VerifyEmail() {
     const verifyEmail = async () => {
       try {
         await verifyTokenOnce(token);
-        setStatus("success");
+        setProgress(100);
+        window.setTimeout(() => setStatus("success"), 220);
       } catch (err) {
-        setStatus("error");
+        setProgress(100);
         const msg = err.response?.data?.message;
         if (msg?.toLowerCase().includes("invalid") || msg?.toLowerCase().includes("expired")) {
           setErrorMessage("This verification link is invalid or has expired. Please register again or contact support.");
         } else {
           setErrorMessage(msg || "Verification failed. Please try again later.");
         }
+        window.setTimeout(() => setStatus("error"), 220);
       }
     };
 
     verifyEmail();
   }, [token]);
 
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center px-4 py-8 verify-fade-in">
+        <div className="text-center">
+          <div
+            className="verify-progress-ring mx-auto mb-4"
+            style={{
+              background: `conic-gradient(#A47550 ${progress * 3.6}deg, rgba(255,255,255,0.12) ${progress * 3.6}deg)`,
+            }}
+          >
+            <div className="verify-progress-inner">
+              <span className="verify-progress-value">{progress}%</span>
+            </div>
+          </div>
+          <p className="text-white/80 text-sm tracking-wide">Verifying your email...</p>
+        </div>
+        <style>{`
+          @keyframes verify-fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          .verify-fade-in { animation: verify-fade-in 0.35s ease-out forwards; }
+          .verify-progress-ring {
+            width: 104px;
+            height: 104px;
+            border-radius: 9999px;
+            padding: 5px;
+            transition: background 0.2s ease;
+          }
+          .verify-progress-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 9999px;
+            background: #000;
+            border: 1px solid rgba(164, 117, 80, 0.22);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .verify-progress-value {
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 0.4px;
+          }
+        `}</style>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-premier-dark via-dark-700 to-premier-copper flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 text-center">
-
-          {/* ── Loading state: spinner ── */}
-          {status === "loading" && (
-            <div className="py-12 verify-fade-in">
-              <div className="mx-auto w-16 h-16 border-4 border-premier-gray border-t-premier-copper rounded-full animate-spin mb-6"></div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Verifying Your Email</h2>
-              <p className="text-dark-400">Please wait while we confirm your account...</p>
-            </div>
-          )}
 
           {/* ── Success state ── */}
           {status === "success" && (
