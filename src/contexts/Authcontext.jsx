@@ -39,8 +39,13 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     const res = await api.post("/auth/login", { email, password });
     if (res?.data?.success) {
-      setCurrentUser(res.data.user);
-      console.log(`[AUTH] User logged in: ${email}, Role: ${res.data.user.role}`);
+      const meRes = await api.get("/auth/me");
+      if (!meRes?.data?.success || !meRes?.data?.user) {
+        throw new Error("Session cookie validation failed after login");
+      }
+      setCurrentUser(meRes.data.user);
+      res.data.user = meRes.data.user;
+      console.log(`[AUTH] User logged in: ${email}, Role: ${meRes.data.user.role}`);
     }
     return res;
   };
@@ -57,10 +62,11 @@ export function AuthProvider({ children }) {
     try {
       const email = currentUser?.email;
       await api.post("/auth/logout");
-      setCurrentUser(null);
       console.log(`[AUTH] User logged out: ${email}`);
     } catch (error) {
       console.error("Logout failed:", error);
+    } finally {
+      setCurrentUser(null);
     }
   };
 

@@ -5,7 +5,7 @@ const API_BASE =
 
 const api = axios.create({
   baseURL: API_BASE,
-  timeout: 10000,
+  timeout: Number(import.meta.env.VITE_API_TIMEOUT_MS || 20000),
   withCredentials: true, // Important for sending/receiving cookies
 });
 
@@ -18,7 +18,7 @@ api.interceptors.response.use(
     const originalRequest = err.config;
     
     // Only handle 401s for /auth/me endpoint
-    if (err.response?.status === 401 && originalRequest.url.includes('/auth/me')) {
+    if (err.response?.status === 401 && originalRequest?.url?.includes('/auth/me')) {
       if (!isRefreshing && !originalRequest._retry) {
         isRefreshing = true;
         originalRequest._retry = true;

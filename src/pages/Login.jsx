@@ -66,11 +66,15 @@ export default function Login() {
         navigate(redirectPath, { replace: true });
       }
     } catch (err) {
-      const backendMessage = err.response?.data?.message || "Login failed";
+      const backendMessage = err.response?.data?.message || err.message || "Login failed";
       const friendlyMessages = {
         "Invalid email or password": "Invalid email or password.",
         "Account not verified. Please verify your email before logging in.":
           "Your account is not verified yet. Check your email and click the verification link.",
+        "Not authorized, no token":
+          "Login succeeded but your browser blocked the session cookie. Enable cookies for this site or use the same-site API domain.",
+        "Session cookie validation failed after login":
+          "Login could not establish a secure session. Please refresh and try again.",
       };
       const errorMessage = friendlyMessages[backendMessage] || backendMessage;
       setErrors({

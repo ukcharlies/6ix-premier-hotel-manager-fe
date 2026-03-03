@@ -20,6 +20,7 @@ export default function Register() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [registrationEmailSent, setRegistrationEmailSent] = useState(true);
+  const [requiresEmailVerification, setRequiresEmailVerification] = useState(true);
 
   // Auto-scroll to first error when validation fails
   useEffect(() => {
@@ -68,6 +69,7 @@ export default function Register() {
       const { confirmPassword, ...registerData } = form;
       const response = await api.post("/auth/register", registerData);
       setRegistrationEmailSent(response.data?.emailSent !== false);
+      setRequiresEmailVerification(response.data?.requiresEmailVerification !== false);
       setRegistrationSuccess(true);
     } catch (err) {
       const data = err.response?.data;
@@ -82,7 +84,10 @@ export default function Register() {
         setErrors(prev => ({ ...prev, ...fieldErrors, submit: null }));
       } else {
         // Generic error (e.g. "User already exists")
-        const message = data?.message || "Registration failed. Please try again.";
+        const message =
+          err.code === "ECONNABORTED"
+            ? "Request timed out. Your account may still have been created. Try logging in or re-registering with the same email."
+            : data?.message || "Registration failed. Please try again.";
         const friendlyMessages = {
           "User already exists": "An account with this email already exists. Try logging in instead.",
           "Error registering user": "Something went wrong on our end. Please try again later.",
@@ -146,8 +151,19 @@ export default function Register() {
                 <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 auth-pulse-slow">
                   <FaEnvelope className="text-3xl text-green-600" />
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Check Your Email</h3>
-                {registrationEmailSent ? (
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+                  {requiresEmailVerification ? "Check Your Email" : "Account Created"}
+                </h3>
+                {!requiresEmailVerification ? (
+                  <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 mb-6 text-left">
+                    <p className="text-sm text-green-800 font-semibold">
+                      Your account is active and ready to use.
+                    </p>
+                    <p className="text-sm text-green-700 mt-2">
+                      Continue to login with your new credentials.
+                    </p>
+                  </div>
+                ) : registrationEmailSent ? (
                   <>
                     <p className="text-dark-400 mb-2">
                       We've sent a verification link to
