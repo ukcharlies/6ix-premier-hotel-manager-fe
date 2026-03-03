@@ -19,6 +19,7 @@ export default function Register() {
   const [focusedField, setFocusedField] = useState(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registrationEmailSent, setRegistrationEmailSent] = useState(true);
 
   // Auto-scroll to first error when validation fails
   useEffect(() => {
@@ -65,7 +66,8 @@ export default function Register() {
     setIsSubmitting(true);
     try {
       const { confirmPassword, ...registerData } = form;
-      await api.post("/auth/register", registerData);
+      const response = await api.post("/auth/register", registerData);
+      setRegistrationEmailSent(response.data?.emailSent !== false);
       setRegistrationSuccess(true);
     } catch (err) {
       const data = err.response?.data;
@@ -145,23 +147,36 @@ export default function Register() {
                   <FaEnvelope className="text-3xl text-green-600" />
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Check Your Email</h3>
-                <p className="text-dark-400 mb-2">
-                  We've sent a verification link to
-                </p>
-                <p className="text-premier-copper font-semibold text-lg mb-6">{form.email}</p>
-                <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6 text-left">
-                  <p className="text-sm text-blue-800 font-bold mb-2">
-                    📧 Next steps:
-                  </p>
-                  <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
-                    <li><strong>Open your email inbox</strong></li>
-                    <li>Click the <strong>"Verify Email"</strong> button in the email</li>
-                    <li>Once verified, you can log in to your account</li>
-                  </ol>
-                </div>
-                <p className="text-sm text-dark-400 mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  💡 <strong>Didn't receive the email?</strong> Check your spam folder or try registering again.
-                </p>
+                {registrationEmailSent ? (
+                  <>
+                    <p className="text-dark-400 mb-2">
+                      We've sent a verification link to
+                    </p>
+                    <p className="text-premier-copper font-semibold text-lg mb-6">{form.email}</p>
+                    <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6 text-left">
+                      <p className="text-sm text-blue-800 font-bold mb-2">
+                        📧 Next steps:
+                      </p>
+                      <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
+                        <li><strong>Open your email inbox</strong></li>
+                        <li>Click the <strong>"Verify Email"</strong> button in the email</li>
+                        <li>Once verified, you can log in to your account</li>
+                      </ol>
+                    </div>
+                    <p className="text-sm text-dark-400 mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                      💡 <strong>Didn't receive the email?</strong> Check your spam folder or try registering again.
+                    </p>
+                  </>
+                ) : (
+                  <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-4 mb-6 text-left">
+                    <p className="text-sm text-amber-800 font-semibold">
+                      Account created, but verification email could not be sent right now.
+                    </p>
+                    <p className="text-sm text-amber-700 mt-2">
+                      Please contact support/admin to verify your account manually before logging in.
+                    </p>
+                  </div>
+                )}
                 <Link
                   to="/login"
                   className="inline-block w-full sm:w-auto bg-gradient-to-r from-premier-copper to-primary-600 text-white font-semibold py-3 px-8 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
