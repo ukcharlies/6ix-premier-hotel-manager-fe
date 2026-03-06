@@ -124,9 +124,25 @@ export default function StaffUploads() {
 
   const getUploadType = (upload) => {
     if (upload?.type) return upload.type;
-    const path = upload?.path || "";
-    const parts = path.split("/").filter(Boolean);
-    return parts[1] || "general";
+    const rawPath = upload?.path || upload?.url || "";
+    if (!rawPath) return "general";
+
+    let normalizedPath = rawPath;
+    if (/^https?:\/\//i.test(rawPath)) {
+      try {
+        normalizedPath = new URL(rawPath).pathname;
+      } catch {
+        normalizedPath = rawPath;
+      }
+    }
+
+    const parts = normalizedPath.split("/").filter(Boolean);
+    const uploadsIndex = parts.lastIndexOf("uploads");
+    if (uploadsIndex >= 0 && parts[uploadsIndex + 1]) {
+      return parts[uploadsIndex + 1];
+    }
+
+    return parts[1] || parts[0] || "general";
   };
 
   if (loading) {
